@@ -1,0 +1,13 @@
+# Cursor AI Rules for Instagram Monorepo (Frontend)
+
+You are assisting with the frontend development of this Instagram clone in `frontend/`.
+
+## Core Guidelines
+- The backend is a NestJS 12 REST API running at `http://localhost:3000`.
+- Detailed API documentation and types are in `FRONTEND_GUIDE.md` and `AI_INSTRUCTIONS.md`.
+- Never invent endpoints or change backend routes.
+- Response format is `{ statusCode: number, data: T | null, errors: string[] | null }`. Always unwrap `data` or handle `errors`.
+- Auth token is sent as `Authorization: Bearer <accessToken>`.
+- Images are served at `http://localhost:3000/uploads/<fileName>`.
+- Use TypeScript, Next.js App Router, and Tailwind CSS.
+- Keep components modular, clean, and mobile-friendly.

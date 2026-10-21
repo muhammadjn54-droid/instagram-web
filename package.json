@@ -1,0 +1,16 @@
+{
+  "name": "instagram-monorepo",
+  "version": "1.0.0",
+  "description": "Instagram Clone Monorepo (NestJS Backend + Next.js Frontend)",
+  "private": true,
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build:backend": "npm --prefix backend run build",
+    "build:frontend": "npm --prefix frontend run build",
+    "seed": "npm --prefix backend run seed"
+  },
+  "keywords": ["instagram-clone", "nestjs", "nextjs", "typescript", "typeorm"],
+  "author": "",
+  "license": "ISC"
+}
