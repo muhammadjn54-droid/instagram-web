@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 export interface PostCarouselProps {
   images: string[];
   alt: string;
+  isReel?: boolean;
   /** Shows the "1/3" counter and the navigation arrows. */
   interactive?: boolean;
   className?: string;
@@ -21,7 +22,13 @@ export interface PostCarouselProps {
  * touch devices; the arrows are a progressive enhancement for pointer
  * devices.
  */
-export function PostCarousel({ images, alt, interactive = true, className }: PostCarouselProps) {
+export function PostCarousel({
+  images,
+  alt,
+  isReel = false,
+  interactive = true,
+  className,
+}: PostCarouselProps) {
   const [index, setIndex] = useState(0);
 
   if (!images || images.length === 0) {
@@ -31,6 +38,7 @@ export function PostCarousel({ images, alt, interactive = true, className }: Pos
         alt={alt}
         aspectClassName="aspect-square"
         className={className}
+        isReel={isReel}
       />
     );
   }
@@ -58,6 +66,7 @@ export function PostCarousel({ images, alt, interactive = true, className }: Pos
             aspectClassName="aspect-square w-full shrink-0 snap-center"
             imgClassName="object-cover"
             loading={position === 0 ? 'eager' : 'lazy'}
+            isReel={isReel}
           />
         ))}
       </div>
