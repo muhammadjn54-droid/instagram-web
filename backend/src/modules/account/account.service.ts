@@ -70,7 +70,7 @@ export class AccountService {
 
   async login(dto: LoginDto): Promise<AuthResponseDto> {
     const user = await this.userRepository.findOne({
-      where: { userName: dto.userName },
+      where: [{ userName: dto.userName }, { email: dto.userName }],
       relations: { profile: true },
     });
 

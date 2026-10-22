@@ -1,26 +1,264 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------ tokens */
+/*
+ * Every colour, radius and shadow used by the application is defined here
+ * once. Components must reference a token (`bg-surface`, `text-muted-foreground`,
+ * `rounded-card`) and never a raw value.
+ */
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --surface: #ffffff;
+  --surface-muted: #f4f4f5;
+  --surface-raised: #ffffff;
+  --surface-inverted: #111113;
+
+  --foreground: #17171a;
+  --muted-foreground: #6b6b76;
+  --subtle-foreground: #9a9aa3;
+
+  --border: #e6e6ea;
+  --border-strong: #d4d4d9;
+
+  --brand: #d62976;
+  --brand-foreground: #ffffff;
+  --brand-muted: #fdeaf3;
+
+  --accent: #0095f6;
+  --accent-foreground: #ffffff;
+  --accent-muted: #e6f4fe;
+
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --destructive-muted: #fef2f2;
+
+  --success: #16a34a;
+  --success-foreground: #ffffff;
+  --success-muted: #f0fdf4;
+
+  --warning: #d97706;
+  --warning-foreground: #ffffff;
+  --warning-muted: #fffbeb;
+
+  --ring: #0095f6;
+
+  --ig-radius-card: 0.875rem;
+  --ig-radius-control: 0.625rem;
+  --ig-radius-pill: 9999px;
+
+  --ig-shadow-card: 0 1px 2px rgb(16 16 24 / 0.05), 0 8px 24px -12px rgb(16 16 24 / 0.12);
+  --ig-shadow-popover: 0 12px 40px -12px rgb(16 16 24 / 0.28);
+
+  --header-height: 3.75rem;
+  --sidebar-width: 15rem;
+  --content-width: 47rem;
+  --page-width: 80rem;
+}
+
+.dark {
+  --background: #0b0b0d;
+  --surface: #141417;
+  --surface-muted: #1d1d21;
+  --surface-raised: #1a1a1e;
+  --surface-inverted: #f4f4f5;
+
+  --foreground: #f4f4f5;
+  --muted-foreground: #a1a1aa;
+  --subtle-foreground: #71717a;
+
+  --border: #27272a;
+  --border-strong: #3f3f46;
+
+  --brand: #e34a8c;
+  --brand-foreground: #ffffff;
+  --brand-muted: #33111f;
+
+  --accent: #3aa9f5;
+  --accent-foreground: #06121c;
+  --accent-muted: #10243a;
+
+  --destructive: #f87171;
+  --destructive-foreground: #2b0707;
+  --destructive-muted: #331010;
+
+  --success: #4ade80;
+  --success-foreground: #06240f;
+  --success-muted: #0d2415;
+
+  --warning: #fbbf24;
+  --warning-foreground: #2a1c02;
+  --warning-muted: #2c2108;
+
+  --ring: #3aa9f5;
+
+  --ig-shadow-card: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px -12px rgb(0 0 0 / 0.7);
+  --ig-shadow-popover: 0 12px 40px -12px rgb(0 0 0 / 0.8);
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-inverted: var(--surface-inverted);
+
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
+
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-muted: var(--brand-muted);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-muted: var(--accent-muted);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-muted: var(--destructive-muted);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-muted: var(--success-muted);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
+
+  --color-ring: var(--ring);
+
+  --radius-card: var(--ig-radius-card);
+  --radius-control: var(--ig-radius-control);
+  --radius-pill: var(--ig-radius-pill);
+
+  --shadow-card: var(--ig-shadow-card);
+  --shadow-popover: var(--ig-shadow-popover);
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------- base */
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  color-scheme: light;
+  -webkit-text-size-adjust: 100%;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* A single, consistent focus ring for every interactive element. */
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--ig-radius-control);
+}
+
+/* Screen-reader-only helper. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Scrollbars that follow the theme. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--border-strong);
+  border-radius: var(--ig-radius-pill);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+/* ---------------------------------------------------------------- motion */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ------------------------------------------------------------ animations */
+
+@keyframes ig-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes ig-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ig-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-fade-in {
+  animation: ig-fade-in 0.22s ease-out both;
+}
+
+.animate-scale-in {
+  animation: ig-scale-in 0.16s ease-out both;
+}
+
+.animate-spin-slow {
+  animation: ig-spin 0.7s linear infinite;
 }

@@ -4,6 +4,7 @@
   "description": "Instagram Clone Monorepo (NestJS Backend + Next.js Frontend)",
   "private": true,
   "scripts": {
+    "dev": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
     "dev:frontend": "npm --prefix frontend run dev",
     "build:backend": "npm --prefix backend run build",
