@@ -1,7 +1,7 @@
 import { cn, getInitials } from '@/lib/utils';
 import { getMediaUrl } from '@/lib/media';
 
-export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'profile';
 
 const SIZES: Record<AvatarSize, string> = {
   xs: 'h-6 w-6 text-[10px]',
@@ -9,6 +9,7 @@ const SIZES: Record<AvatarSize, string> = {
   md: 'h-10 w-10 text-sm',
   lg: 'h-16 w-16 text-lg',
   xl: 'h-24 w-24 text-2xl',
+  profile: 'h-[150px] w-[150px] text-5xl sm:h-[188px] sm:w-[188px]',
 };
 
 export interface AvatarProps {

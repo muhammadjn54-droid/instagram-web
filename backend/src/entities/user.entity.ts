@@ -32,8 +32,15 @@ export class User {
   @Column()
   password!: string;
 
-  @Column({ nullable: true })
-  refreshToken?: string;
+  @Column({ type: 'varchar', nullable: true })
+  refreshToken?: string | null;
+
+  /** SHA-256 of the pending password-reset token (the raw token is never stored). */
+  @Column({ type: 'varchar', nullable: true })
+  resetTokenHash?: string | null;
+
+  @Column({ type: 'datetime', nullable: true })
+  resetTokenExpiresAt?: Date | null;
 
   @CreateDateColumn()
   createdAt!: Date;

@@ -7,24 +7,26 @@ import { Compass, Home, MessageCircle, PlusSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useGetMyProfileQuery } from '@/features/profiles/profilesApi';
 import { Avatar } from '@/components/ui/Avatar';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 /**
  * Bottom navigation bar for small screens.
  */
 export function MobileNav() {
+  const t = useT();
   const pathname = usePathname();
   const { data: profile } = useGetMyProfileQuery();
 
   const items = [
-    { href: '/feed', label: 'Главная', icon: Home },
-    { href: '/explore', label: 'Поиск', icon: Compass },
-    { href: '/post/new', label: 'Создать', icon: PlusSquare },
-    { href: '/messages', label: 'Сообщения', icon: MessageCircle },
+    { href: '/feed', label: t('Главная'), icon: Home },
+    { href: '/explore', label: t('Поиск'), icon: Compass },
+    { href: '/post/new', label: t('Создать'), icon: PlusSquare },
+    { href: '/messages', label: t('Сообщения'), icon: MessageCircle },
   ];
 
   return (
     <nav
-      aria-label="Мобильная навигация"
+      aria-label={t('Мобильная навигация')}
       className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       {items.map((item) => {
@@ -63,7 +65,7 @@ export function MobileNav() {
           name={profile?.fullName ?? profile?.userName}
           size="xs"
         />
-        <span>Профиль</span>
+        <span>{t('Профиль')}</span>
       </Link>
     </nav>
   );

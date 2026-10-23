@@ -5,14 +5,13 @@ import { useState } from 'react';
 import { Avatar } from '@/components/ui/Avatar';
 import { useGetStoriesQuery } from '@/features/stories/storiesApi';
 import { StoryViewer } from './StoryViewer';
-import type { UserStoriesGroup } from '@/types';
 
 /**
  * Horizontal tray of story authors.
  */
 export function StoriesTray() {
   const { data, isLoading, isError } = useGetStoriesQuery();
-  const [activeGroup, setActiveGroup] = useState<UserStoriesGroup | null>(null);
+  const [activeUserId, setActiveUserId] = useState<number | null>(null);
 
   if (isLoading) {
     return (
@@ -38,7 +37,7 @@ export function StoriesTray() {
           <button
             key={group.userId}
             type="button"
-            onClick={() => setActiveGroup(group)}
+            onClick={() => setActiveUserId(group.userId)}
             className="flex w-20 shrink-0 flex-col items-center gap-1.5 rounded-control p-1 transition-colors hover:bg-surface-muted"
           >
             <Avatar
@@ -55,9 +54,10 @@ export function StoriesTray() {
       </div>
 
       <StoryViewer
-        key={activeGroup?.userId ?? 'none'}
-        group={activeGroup}
-        onClose={() => setActiveGroup(null)}
+        groups={data}
+        activeUserId={activeUserId}
+        onSelectUser={setActiveUserId}
+        onClose={() => setActiveUserId(null)}
       />
     </>
   );

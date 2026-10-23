@@ -1,5 +1,8 @@
 # API CONTRACT — Frontend ↔ Backend
 
+> **STATUS NOTE (2026-10-23):** historical plan. The verified contract is `../../backend/API_CONTRACT.md` and `../../specs/API_INTEGRATION.md`.
+
+
 | Field | Value |
 |---|---|
 | Backend | `backend/` — NestJS 12, base URL `http://localhost:3000` |

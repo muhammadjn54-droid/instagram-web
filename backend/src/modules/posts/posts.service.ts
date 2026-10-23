@@ -108,6 +108,33 @@ export class PostsService {
     return new PagedResult(items, totalCount, pageNumber, pageSize);
   }
 
+  /**
+   * Loads posts by id and returns them as `PostDto` in the order of `ids`.
+   * Used by the favorites list so that no raw entity ever leaves the API.
+   */
+  async findByIds(ids: number[], currentUserId?: number): Promise<PostDto[]> {
+    if (ids.length === 0) return [];
+
+    const posts = await this.postRepository.find({
+      where: { id: In(ids) },
+      relations: {
+        user: { profile: true },
+        location: true,
+        images: true,
+        likes: true,
+        views: true,
+        comments: true,
+        favorites: true,
+      },
+    });
+
+    const byId = new Map(posts.map((p) => [p.id, p]));
+    return ids
+      .map((id) => byId.get(id))
+      .filter((p): p is Post => !!p)
+      .map((p) => this.mapToDto(p, currentUserId));
+  }
+
   async getFeed(
     currentUserId: number,
     query: PaginationDto,

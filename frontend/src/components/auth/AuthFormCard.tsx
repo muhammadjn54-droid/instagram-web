@@ -2,6 +2,8 @@
 
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 
+import { useT } from '@/lib/i18n/LocaleProvider';
+
 import { cn } from '@/lib/utils';
 
 export interface AuthFormCardProps {
@@ -28,6 +30,7 @@ export function AuthFormCard({
   className,
   showMetaLogo = true,
 }: AuthFormCardProps) {
+  const t = useT();
   return (
     <div className={cn('w-full max-w-[380px] sm:max-w-[400px]', className)}>
       <h1 className="mb-4 text-[20px] sm:text-[22px] font-semibold tracking-tight text-neutral-900">
@@ -46,7 +49,7 @@ export function AuthFormCard({
           className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs leading-relaxed text-red-600 animate-fade-in"
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" aria-hidden="true" />
-          <span>{error}</span>
+          <span>{t(error)}</span>
         </div>
       ) : null}
 

@@ -1,7 +1,11 @@
+'use client';
+
 import { AlertCircle, Inbox, Loader2, RefreshCw } from 'lucide-react';
 
 import { Button } from './Button';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/LocaleProvider';
+import { tr } from '@/lib/i18n/core';
 
 /** Small inline spinner. */
 export function Spinner({ className }: { className?: string }) {
@@ -81,6 +85,7 @@ export function EmptyState({
   action?: React.ReactNode;
   className?: string;
 }) {
+  const t = useT();
   return (
     <div
       className={cn(
@@ -94,7 +99,7 @@ export function EmptyState({
       </div>
 
       <div className="space-y-1">
-        <p className="text-sm font-semibold text-foreground">{title}</p>
+        <p className="text-sm font-semibold text-foreground">{t(title)}</p>
         {description ? (
           <p className="mx-auto max-w-sm text-xs leading-relaxed text-muted-foreground">
             {description}
@@ -109,7 +114,7 @@ export function EmptyState({
 
 /** Error state with an optional retry action. */
 export function ErrorState({
-  title = 'Не удалось загрузить данные',
+  title = tr('Не удалось загрузить данные'),
   message,
   onRetry,
   className,
@@ -119,6 +124,7 @@ export function ErrorState({
   onRetry?: () => void;
   className?: string;
 }) {
+  const t = useT();
   return (
     <div
       role="alert"
@@ -133,17 +139,22 @@ export function ErrorState({
       </div>
 
       <div className="space-y-1">
-        <p className="text-sm font-semibold text-foreground">{title}</p>
+        <p className="text-sm font-semibold text-foreground">{t(title)}</p>
         {message ? (
           <p className="mx-auto max-w-sm text-xs leading-relaxed text-muted-foreground">
-            {message}
+            {t(message)}
           </p>
         ) : null}
       </div>
 
       {onRetry ? (
-        <Button variant="outline" size="sm" icon={<RefreshCw className="h-3.5 w-3.5" />}>
-          Повторить
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onRetry}
+          icon={<RefreshCw className="h-3.5 w-3.5" />}
+        >
+          {t('Повторить')}
         </Button>
       ) : null}
     </div>
@@ -161,7 +172,8 @@ export function Skeleton({ className }: { className?: string }) {
 }
 
 /** Generic centred loading indicator. */
-export function LoadingState({ label = 'Загрузка…' }: { label?: string }) {
+export function LoadingState({ label = tr('Загрузка…') }: { label?: string }) {
+  const t = useT();
   return (
     <div
       role="status"
@@ -169,7 +181,7 @@ export function LoadingState({ label = 'Загрузка…' }: { label?: string
       className="flex items-center justify-center gap-2 px-6 py-16 text-sm text-muted-foreground"
     >
       <Spinner />
-      <span>{label}</span>
+      <span>{t(label)}</span>
     </div>
   );
 }

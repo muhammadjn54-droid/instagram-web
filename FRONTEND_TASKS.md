@@ -1,5 +1,8 @@
 # 📋 План задач для Фронтенд-разработчика (Frontend Roadmap)
 
+> **STATUS NOTE (2026-10-23):** steps 1–10 below are **implemented** (functionally). Differences: routes are `/messages`, `/profile/[userId]`, `/post/[postId]`; pagination replaces infinite scroll; modals for create-post / post / search are pages for now; Reels is a grid; JWT lives in an httpOnly cookie behind the `/api/backend` proxy instead of `src/lib/api.ts` + `localStorage`. What is still open: see `tz.md` §5–§6. The UI skin and the interaction extras (double-tap like, infinite scroll, drawers, reels player) are scheduled for the UI phase.
+
+
 > **Привет, коллега!** 👋  
 > Бэкенд на NestJS уже полностью готов, протестирован и запущен на `http://localhost:3000`.  
 > Вся база данных наполнена тестовыми пользователями и постами (команда `npm run seed`).  

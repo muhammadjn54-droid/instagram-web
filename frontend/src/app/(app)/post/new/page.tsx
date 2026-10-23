@@ -2,10 +2,12 @@ import type { Metadata } from 'next';
 
 import { PageHeader } from '@/components/layout/PageHeader';
 import { PostCreateForm } from '@/components/post/PostCreateForm';
+import { getT } from '@/lib/i18n/server';
 
-export const metadata: Metadata = {
-  title: 'Новая публикация',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return { title: t('Новая публикация') };
+}
 
 export default function NewPostPage() {
   return (

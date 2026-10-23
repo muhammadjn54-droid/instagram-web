@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Volume2, VolumeX, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getMediaUrl } from '@/lib/media';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 export interface VideoPlayerProps {
   src?: string | null;
@@ -22,6 +23,7 @@ export function VideoPlayer({
   autoPlay = false,
   loop = true,
 }: VideoPlayerProps) {
+  const t = useT();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [isMuted, setIsMuted] = useState(false);
@@ -107,7 +109,7 @@ export function VideoPlayer({
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-neutral-400">
-          Видео недоступно
+          {t('Видео недоступно')}
         </div>
       )}
 
@@ -124,7 +126,7 @@ export function VideoPlayer({
       <button
         type="button"
         onClick={toggleSound}
-        aria-label={isMuted ? 'Включить звук' : 'Выключить звук'}
+        aria-label={isMuted ? t('Включить звук') : t('Выключить звук')}
         className="absolute bottom-3 right-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white shadow-md backdrop-blur-sm transition-transform hover:scale-110 active:scale-95"
       >
         {isMuted ? (

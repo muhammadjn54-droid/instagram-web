@@ -6,6 +6,7 @@ import { Clapperboard, ImageOff } from 'lucide-react';
 import { MediaImage } from '@/components/shared/MediaImage';
 import { cn } from '@/lib/utils';
 import type { Post } from '@/types';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 export interface PostGridProps {
   posts: Post[];
@@ -19,6 +20,7 @@ export interface PostGridProps {
  * Responsive grid of posts (profile, explore, saved).
  */
 export function PostGrid({ posts, columns = 3, emptyState, className }: PostGridProps) {
+  const t = useT();
   if (posts.length === 0) {
     return <>{emptyState}</>;
   }
@@ -37,11 +39,12 @@ export function PostGrid({ posts, columns = 3, emptyState, className }: PostGrid
         <Link
           key={post.id}
           href={`/post/${post.id}`}
+          aria-label={`${t('Открыть публикацию')} ${post.title ?? post.content ?? ''}`.trim()}
           className="group relative block aspect-square overflow-hidden bg-neutral-100 dark:bg-neutral-900"
         >
           <MediaImage
             src={post.images?.[0]}
-            alt={post.title ?? post.content ?? 'Публикация'}
+            alt={post.title ?? post.content ?? t('Публикация')}
             aspectClassName="aspect-square"
             imgClassName="transition-transform duration-300 group-hover:scale-[1.03]"
             fallback={<ImageOff className="h-5 w-5" aria-hidden="true" />}

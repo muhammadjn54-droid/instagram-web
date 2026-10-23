@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { MediaImage } from '@/components/shared/MediaImage';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 export interface PostCarouselProps {
   images: string[];
@@ -29,7 +30,9 @@ export function PostCarousel({
   interactive = true,
   className,
 }: PostCarouselProps) {
+  const t = useT();
   const [index, setIndex] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   if (!images || images.length === 0) {
     return (
@@ -43,14 +46,23 @@ export function PostCarousel({
     );
   }
 
-  const goTo = (next: number) => {
+  const goTo = (event: React.MouseEvent, next: number) => {
+    // The carousel sits inside a link to the post page: arrows must not navigate.
+    event.preventDefault();
+    event.stopPropagation();
+
     const clamped = Math.min(Math.max(next, 0), images.length - 1);
+    const track = trackRef.current;
+    if (track) {
+      track.scrollTo({ left: clamped * track.clientWidth, behavior: 'smooth' });
+    }
     setIndex(clamped);
   };
 
   return (
-    <div className={cn('relative', className)}>
+    <div className={cn('group relative', className)}>
       <div
+        ref={trackRef}
         className="flex snap-x snap-mandatory overflow-x-auto scrollbar-none"
         onScroll={(event) => {
           const element = event.currentTarget;
@@ -62,7 +74,7 @@ export function PostCarousel({
           <MediaImage
             key={`${image}-${position}`}
             src={image}
-            alt={`${alt} — изображение ${position + 1}`}
+            alt={t('{alt} — изображение {n}', { alt, n: position + 1 })}
             aspectClassName="aspect-square w-full shrink-0 snap-center"
             imgClassName="object-cover"
             loading={position === 0 ? 'eager' : 'lazy'}
@@ -75,9 +87,9 @@ export function PostCarousel({
         <>
           <button
             type="button"
-            onClick={() => goTo(index - 1)}
+            onClick={(event) => goTo(event, index - 1)}
             disabled={index === 0}
-            aria-label="Предыдущее изображение"
+            aria-label={t('Предыдущее изображение')}
             className="absolute left-2 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-pill bg-black/50 text-white opacity-0 transition-opacity hover:bg-black/70 focus-visible:opacity-100 group-hover:opacity-100 sm:flex disabled:pointer-events-none disabled:opacity-0"
           >
             <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -85,9 +97,9 @@ export function PostCarousel({
 
           <button
             type="button"
-            onClick={() => goTo(index + 1)}
+            onClick={(event) => goTo(event, index + 1)}
             disabled={index === images.length - 1}
-            aria-label="Следующее изображение"
+            aria-label={t('Следующее изображение')}
             className="absolute right-2 top-1/2 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-pill bg-black/50 text-white opacity-0 transition-opacity hover:bg-black/70 focus-visible:opacity-100 group-hover:opacity-100 sm:flex disabled:pointer-events-none disabled:opacity-0"
           >
             <ChevronRight className="h-5 w-5" aria-hidden="true" />

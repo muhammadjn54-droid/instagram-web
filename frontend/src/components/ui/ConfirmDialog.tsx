@@ -4,6 +4,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 
 import { Button } from './Button';
 import { Dialog } from './Dialog';
+import { useT } from '@/lib/i18n/LocaleProvider';
+import { tr } from '@/lib/i18n/core';
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -28,14 +30,15 @@ export function ConfirmDialog({
   open,
   title,
   description,
-  confirmLabel = 'Подтвердить',
-  cancelLabel = 'Отмена',
+  confirmLabel = tr('Подтвердить'),
+  cancelLabel = tr('Отмена'),
   destructive = false,
   loading = false,
   onConfirm,
   onCancel,
   children,
 }: ConfirmDialogProps) {
+  const t = useT();
   const [cancelRef, setCancelRef] = useState<HTMLButtonElement | null>(null);
 
   useEffect(() => {
@@ -52,14 +55,14 @@ export function ConfirmDialog({
       footer={
         <>
           <Button ref={setCancelRef} variant="ghost" onClick={onCancel} disabled={loading}>
-            {cancelLabel}
+            {t(cancelLabel)}
           </Button>
           <Button
             variant={destructive ? 'danger' : 'primary'}
             onClick={onConfirm}
             loading={loading}
           >
-            {confirmLabel}
+            {t(confirmLabel)}
           </Button>
         </>
       }

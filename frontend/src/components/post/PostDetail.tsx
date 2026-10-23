@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 
 import { Card, ErrorState, LoadingState } from '@/components/ui/States';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -10,6 +9,7 @@ import { PostCard } from '@/components/feed/PostCard';
 import { CommentSection } from './CommentSection';
 import { useGetPostQuery, useRecordPostViewMutation } from '@/features/posts/postsApi';
 import { useGetMyProfileQuery } from '@/features/profiles/profilesApi';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 /**
  * Single post page.
@@ -18,7 +18,9 @@ import { useGetMyProfileQuery } from '@/features/profiles/profilesApi';
  * needs no server-side data access.
  */
 export function PostDetail() {
+  const t = useT();
   const params = useParams<{ postId: string }>();
+  const router = useRouter();
   const postId = Number(params?.postId);
 
   const { data: profile } = useGetMyProfileQuery();
@@ -37,20 +39,20 @@ export function PostDetail() {
   if (!Number.isFinite(postId)) {
     return (
       <ErrorState
-        title="Некорректный адрес публикации"
-        message="Идентификатор публикации должен быть числом."
+        title={t('Некорректный адрес публикации')}
+        message={t('Идентификатор публикации должен быть числом.')}
       />
     );
   }
 
   if (isLoading) {
-    return <LoadingState label="Загружаем публикацию…" />;
+    return <LoadingState label={t('Загружаем публикацию…')} />;
   }
 
   if (isError || !post) {
     return (
       <ErrorState
-        title="Не удалось загрузить публикацию"
+        title={t('Не удалось загрузить публикацию')}
         message={error?.message}
         onRetry={refetch}
       />
@@ -60,25 +62,17 @@ export function PostDetail() {
   return (
     <div className="mx-auto w-full max-w-[47rem] space-y-4 px-4 py-4">
       <PageHeader
-        title="Публикация"
+        title={t('Публикация')}
         backHref="/feed"
-        backLabel="Назад в ленту"
+        backLabel={t('Назад в ленту')}
       />
 
-      <PostCard post={post} detailed owned={post.userId === profile?.userId} />
+      <PostCard post={post} detailed onDeleted={() => router.replace('/feed')} />
 
       <Card className="p-4 sm:p-5">
         <CommentSection postId={post.id} canDelete={post.userId === profile?.userId} />
       </Card>
 
-      {post.images.length > 1 ? (
-        <Link
-          href={`/post/${post.id}`}
-          className="block text-center text-xs text-muted-foreground hover:text-foreground"
-        >
-          Открыть все изображения
-        </Link>
-      ) : null}
     </div>
   );
 }

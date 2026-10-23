@@ -64,15 +64,13 @@ const chatsApi = igApi.injectEndpoints({
       },
       invalidatesTags: (_result, _error, { chatId }) => [
         { type: 'Message' as const, id: `CHAT-${chatId}` },
-        { type: 'Chat' as const, id: 'LIST' as const },
+        'Chat',
       ],
     }),
 
     markChatRead: builder.mutation<string, number>({
       query: (chatId) => ({ url: API_ROUTES.chats.read(chatId), method: 'PATCH' }),
-      invalidatesTags: (_result, _error, chatId) => [
-        { type: 'Message' as const, id: `CHAT-${chatId}` },
-      ],
+      invalidatesTags: ['Chat'],
     }),
 
     deleteMessage: builder.mutation<string, { chatId: number; messageId: number }>({

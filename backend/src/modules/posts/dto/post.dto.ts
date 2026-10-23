@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { IsBoolean, IsInt, IsOptional, IsString } from 'class-validator';
 import { PaginationDto } from '../../../common/dto/pagination.dto.js';
 
@@ -16,7 +16,9 @@ export class PostQueryDto extends PaginationDto {
   title?: string;
 
   @ApiPropertyOptional({ description: 'Filter only reels (short videos)' })
-  @Type(() => Boolean)
+  @Transform(({ obj, key }) =>
+    obj[key] === undefined ? undefined : ['true', '1', true].includes(obj[key]),
+  )
   @IsBoolean()
   @IsOptional()
   isReel?: boolean;
@@ -40,7 +42,9 @@ export class CreatePostDto {
   locationId?: number;
 
   @ApiPropertyOptional({ example: false, description: 'Whether this post is a reel' })
-  @Type(() => Boolean)
+  @Transform(({ obj, key }) =>
+    obj[key] === undefined ? undefined : ['true', '1', true].includes(obj[key]),
+  )
   @IsBoolean()
   @IsOptional()
   isReel?: boolean;

@@ -1,5 +1,7 @@
+import { createHash, randomBytes } from 'node:crypto';
 import {
   Injectable,
+  Logger,
   ConflictException,
   UnauthorizedException,
   BadRequestException,
@@ -21,8 +23,15 @@ import type {
   AuthResponseDto,
 } from './dto/account.dto.js';
 
+const RESET_TOKEN_TTL_MS = 15 * 60 * 1000;
+
+const hashToken = (token: string): string =>
+  createHash('sha256').update(token).digest('hex');
+
 @Injectable()
 export class AccountService {
+  private readonly logger = new Logger(AccountService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -100,7 +109,7 @@ export class AccountService {
   }
 
   async logout(userId: number): Promise<string> {
-    await this.userRepository.update(userId, { refreshToken: undefined });
+    await this.userRepository.update(userId, { refreshToken: null });
     return 'Logged out successfully';
   }
 
@@ -113,7 +122,20 @@ export class AccountService {
       throw new NotFoundException('User with this email not found');
     }
 
-    return `Password reset token has been generated: reset-token-${user.id}`;
+    // There is no mail service: the token is written to the server log (the
+    // "mailbox" of the developer) and, outside production only, returned in
+    // the response so the reset flow stays usable in the UI.
+    const token = randomBytes(24).toString('hex');
+    await this.userRepository.update(user.id, {
+      resetTokenHash: hashToken(token),
+      resetTokenExpiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+    });
+    this.logger.log(`Password reset token for ${user.email}: ${token}`);
+
+    if (process.env.NODE_ENV === 'production') {
+      return 'If this e-mail is registered, a reset token has been sent';
+    }
+    return `Password reset token has been generated: ${token}`;
   }
 
   async resetPassword(dto: ResetPasswordDto): Promise<string> {
@@ -129,8 +151,24 @@ export class AccountService {
       throw new NotFoundException('User not found');
     }
 
+    const tokenIsValid =
+      !!user.resetTokenHash &&
+      !!user.resetTokenExpiresAt &&
+      user.resetTokenExpiresAt.getTime() > Date.now() &&
+      user.resetTokenHash === hashToken(dto.token);
+
+    if (!tokenIsValid) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
-    await this.userRepository.update(user.id, { password: hashedPassword });
+    // The token is single use; any open session is revoked with the old password.
+    await this.userRepository.update(user.id, {
+      password: hashedPassword,
+      resetTokenHash: null,
+      resetTokenExpiresAt: null,
+      refreshToken: null,
+    });
 
     return 'Password reset successfully';
   }
@@ -167,7 +205,7 @@ export class AccountService {
     };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '1d' });
-    const refreshToken = `ref-${user.id}-${Date.now()}`;
+    const refreshToken = `ref-${randomBytes(32).toString('hex')}`;
 
     await this.userRepository.update(user.id, { refreshToken });
 

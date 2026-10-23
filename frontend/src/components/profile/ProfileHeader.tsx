@@ -2,159 +2,195 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Globe, Lock, MessageCircle, Pencil, UserCheck, UserPlus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Globe, Lock, Settings } from 'lucide-react';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { FollowersDialog } from './FollowersDialog';
+import { useGetOrCreateChatMutation } from '@/features/chats/chatsApi';
 import { useFollowUserMutation, useUnfollowUserMutation } from '@/features/users/usersApi';
 import { useToast } from '@/components/ui/Toast';
-import { formatCount } from '@/lib/utils';
+import { cn, formatCount, getErrorMessage } from '@/lib/utils';
 import type { Profile } from '@/types';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 export interface ProfileHeaderProps {
   profile: Profile;
   /** `true` when the viewer owns the profile. */
   isOwner: boolean;
-  onOpenFollowers?: () => void;
-  onOpenFollowing?: () => void;
+  /** The user has active stories: the avatar gets a ring and opens them. */
+  hasStories?: boolean;
+  onOpenStories?: () => void;
 }
 
+const WIDE_BUTTON =
+  'flex h-11 flex-1 items-center justify-center rounded-lg bg-surface-muted px-4 text-sm font-semibold text-foreground transition-colors hover:bg-border';
+
 /**
- * Header of a profile: avatar, statistics and the primary actions.
+ * Header of a profile: big avatar, name, counters, bio and the main actions.
  */
 export function ProfileHeader({
   profile,
   isOwner,
-  onOpenFollowers,
-  onOpenFollowing,
+  hasStories = false,
+  onOpenStories,
 }: ProfileHeaderProps) {
+  const t = useT();
   const { toast } = useToast();
+  const router = useRouter();
   const [dialog, setDialog] = useState<'followers' | 'following' | null>(null);
 
   const [follow, { isLoading: isFollowing }] = useFollowUserMutation();
   const [unfollow, { isLoading: isUnfollowing }] = useUnfollowUserMutation();
+  const [openChat, { isLoading: isOpeningChat }] = useGetOrCreateChatMutation();
 
   const toggleFollow = async () => {
     try {
       if (profile.isFollowing) await unfollow(profile.userId).unwrap();
       else await follow(profile.userId).unwrap();
-    } catch {
-      toast('Не удалось изменить подписку', 'error');
+    } catch (error) {
+      toast(getErrorMessage(error, t('Не удалось изменить подписку')), 'error');
     }
   };
 
-  return (
-    <section className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-8">
-      <Avatar src={profile.avatar} name={profile.fullName || profile.userName} size="xl" />
+  const startChat = async () => {
+    try {
+      const chat = await openChat(profile.userId).unwrap();
+      router.push(`/messages/${chat.id}`);
+    } catch (error) {
+      toast(getErrorMessage(error, t('Не удалось открыть диалог')), 'error');
+    }
+  };
 
-      <div className="min-w-0 flex-1 space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-xl font-bold text-foreground">{profile.userName}</h1>
+  const avatar = (
+    <Avatar
+      src={profile.avatar}
+      name={profile.fullName || profile.userName}
+      size="profile"
+      ring={hasStories}
+    />
+  );
+
+  return (
+    <section className="mx-auto grid w-full max-w-[860px] gap-6 px-4 sm:grid-cols-[auto_1fr] sm:gap-x-20 sm:gap-y-8 sm:px-0">
+      <div className="flex justify-center sm:justify-start">
+        {hasStories ? (
+          <button
+            type="button"
+            onClick={onOpenStories}
+            aria-label={t('Смотреть истории')}
+            className="rounded-full transition-transform hover:scale-[1.02]"
+          >
+            {avatar}
+          </button>
+        ) : (
+          avatar
+        )}
+      </div>
+
+      <div className="min-w-0 space-y-4 text-center sm:space-y-5 sm:pt-4 sm:text-left">
+        <div className="flex items-center justify-center gap-3 sm:justify-start">
+          <h1 className="truncate text-xl font-bold text-foreground sm:text-2xl">
+            {profile.userName}
+          </h1>
+
+          {isOwner ? (
+            <Link
+              href="/profile/me/edit"
+              aria-label={t('Настройки профиля')}
+              className="flex h-9 w-9 items-center justify-center rounded-full text-foreground hover:bg-surface-muted"
+            >
+              <Settings className="h-6 w-6" aria-hidden="true" />
+            </Link>
+          ) : null}
 
           {profile.isPrivate ? (
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-              Закрытый аккаунт
+              {t('Закрытый аккаунт')}
             </span>
           ) : null}
-
-          <div className="ml-auto flex items-center gap-2">
-            {isOwner ? (
-              <Link href="/profile/me/edit">
-                <Button variant="outline" size="sm" icon={<Pencil className="h-4 w-4" />}>
-                  Редактировать
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Button
-                  size="sm"
-                  variant={profile.isFollowing ? 'secondary' : 'primary'}
-                  onClick={toggleFollow}
-                  loading={isFollowing || isUnfollowing}
-                  icon={
-                    profile.isFollowing ? (
-                      <UserCheck className="h-4 w-4" />
-                    ) : (
-                      <UserPlus className="h-4 w-4" />
-                    )
-                  }
-                >
-                  {profile.isFollowing ? 'Вы подписаны' : 'Подписаться'}
-                </Button>
-
-                <Link href="/messages">
-                  <Button variant="outline" size="sm" icon={<MessageCircle className="h-4 w-4" />}>
-                    Написать
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
         </div>
 
-        <dl className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-foreground">
-          <div className="flex items-center gap-1.5">
-            <dt className="sr-only">Публикации</dt>
+        {profile.fullName ? (
+          <p className="text-base font-medium text-foreground">{profile.fullName}</p>
+        ) : null}
+
+        <dl className="flex items-center justify-center gap-x-8 text-base text-foreground sm:justify-start">
+          <div className="flex items-baseline gap-1.5">
             <dd className="font-semibold">{formatCount(profile.postsCount)}</dd>
-            <dd aria-hidden="true" className="text-muted-foreground">
-              публикаций
-            </dd>
+            <dt className="text-foreground">{t('публикаций')}</dt>
           </div>
 
           <button
             type="button"
-            onClick={() => {
-              setDialog('followers');
-              onOpenFollowers?.();
-            }}
-            className="flex items-center gap-1.5 transition-colors hover:text-muted-foreground"
+            onClick={() => setDialog('followers')}
+            className="flex items-baseline gap-1.5 hover:opacity-70"
           >
-            <dt className="sr-only">Подписчики</dt>
             <dd className="font-semibold">{formatCount(profile.followersCount)}</dd>
-            <dd aria-hidden="true" className="text-muted-foreground">
-              подписчиков
-            </dd>
+            <dt>{t('подписчиков')}</dt>
           </button>
 
           <button
             type="button"
-            onClick={() => {
-              setDialog('following');
-              onOpenFollowing?.();
-            }}
-            className="flex items-center gap-1.5 transition-colors hover:text-muted-foreground"
+            onClick={() => setDialog('following')}
+            className="flex items-baseline gap-1.5 hover:opacity-70"
           >
-            <dt className="sr-only">Подписки</dt>
             <dd className="font-semibold">{formatCount(profile.followingCount)}</dd>
-            <dd aria-hidden="true" className="text-muted-foreground">
-              подписок
-            </dd>
+            <dt>{t('подписок')}</dt>
           </button>
         </dl>
 
-        <div className="space-y-1 text-sm">
-          {profile.fullName ? (
-            <p className="font-semibold text-foreground">{profile.fullName}</p>
-          ) : null}
+        {profile.bio ? (
+          <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">
+            {profile.bio}
+          </p>
+        ) : null}
 
-          {profile.bio ? (
-            <p className="whitespace-pre-line leading-relaxed text-foreground">{profile.bio}</p>
-          ) : null}
+        {profile.website ? (
+          <a
+            href={profile.website}
+            target="_blank"
+            rel="noreferrer noopener nofollow"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-accent hover:underline"
+          >
+            <Globe className="h-3.5 w-3.5" aria-hidden="true" />
+            {profile.website.replace(/^https?:\/\//, '')}
+          </a>
+        ) : null}
+      </div>
 
-          {profile.website ? (
-            <a
-              href={profile.website}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="inline-flex items-center gap-1 font-medium text-accent hover:underline"
+      <div className="flex gap-3 sm:col-span-2">
+        {isOwner ? (
+          <>
+            <Link href="/profile/me/edit" className={WIDE_BUTTON}>
+              {t('Редактировать профиль')}
+            </Link>
+            <Link href="/saved" className={WIDE_BUTTON}>
+              {t('Сохранённое')}
+            </Link>
+          </>
+        ) : (
+          <>
+            <Button
+              variant={profile.isFollowing ? 'secondary' : 'primary'}
+              onClick={toggleFollow}
+              loading={isFollowing || isUnfollowing}
+              className={cn('h-11 flex-1 rounded-lg font-semibold')}
             >
-              <Globe className="h-3.5 w-3.5" aria-hidden="true" />
-              {profile.website.replace(/^https?:\/\//, '')}
-            </a>
-          ) : null}
-        </div>
+              {profile.isFollowing ? t('Вы подписаны') : t('Подписаться')}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={startChat}
+              loading={isOpeningChat}
+              className="h-11 flex-1 rounded-lg font-semibold"
+            >
+              {t('Написать')}
+            </Button>
+          </>
+        )}
       </div>
 
       <FollowersDialog

@@ -5,6 +5,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { Button } from './Button';
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/LocaleProvider';
+import { tr } from '@/lib/i18n/core';
 
 export interface PaginationProps {
   page: number;
@@ -27,8 +29,9 @@ export function Pagination({
   totalCount,
   onPageChange,
   className,
-  label = 'Постраничная навигация',
+  label = tr('Постраничная навигация'),
 }: PaginationProps) {
+  const t = useT();
   const [isPending, startTransition] = useTransition();
 
   if (totalPages <= 1) return null;
@@ -40,20 +43,20 @@ export function Pagination({
 
   return (
     <nav
-      aria-label={label}
+      aria-label={t(label)}
       className={cn('flex items-center justify-between gap-3 pt-4', className)}
     >
       <p className="text-xs text-muted-foreground">
         {typeof totalCount === 'number'
-          ? `Всего: ${new Intl.NumberFormat('ru-RU').format(totalCount)}`
-          : `Страница ${page} из ${totalPages}`}
+          ? t('Всего: {count}', { count: new Intl.NumberFormat('ru-RU').format(totalCount) })
+          : t('Страница {page} из {total}', { page, total: totalPages })}
       </p>
 
       <div className="flex items-center gap-2">
         <Button
           variant="outline"
           size="icon"
-          aria-label="Предыдущая страница"
+          aria-label={t('Предыдущая страница')}
           disabled={page <= 1 || isPending}
           onClick={() => goTo(page - 1)}
           icon={<ChevronLeft className="h-4 w-4" />}
@@ -64,7 +67,7 @@ export function Pagination({
         <Button
           variant="outline"
           size="icon"
-          aria-label="Следующая страница"
+          aria-label={t('Следующая страница')}
           disabled={page >= totalPages || isPending}
           onClick={() => goTo(page + 1)}
           icon={<ChevronRight className="h-4 w-4" />}

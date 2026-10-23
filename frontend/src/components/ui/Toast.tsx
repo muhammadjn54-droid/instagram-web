@@ -11,6 +11,7 @@ import { createPortal } from 'react-dom';
 import { CheckCircle2, Info, X, XCircle } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 type ToastTone = 'success' | 'error' | 'info';
 
@@ -48,6 +49,7 @@ const TONE_STYLES: Record<ToastTone, { icon: ReactNode; className: string }> = {
  * needs a single queue of short-lived status messages.
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const t = useT();
   const [items, setItems] = useState<ToastItem[]>([]);
 
   const dismiss = useCallback((id: number) => {
@@ -70,7 +72,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         ? createPortal(
             <div
               role="region"
-              aria-label="Уведомления"
+              aria-label={t('Уведомления')}
               className="pointer-events-none fixed inset-x-0 bottom-20 z-[60] flex flex-col items-center gap-2 px-4 sm:bottom-6"
             >
               {items.map((item) => (
@@ -85,11 +87,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   )}
                 >
                   {TONE_STYLES[item.tone].icon}
-                  <p className="flex-1 leading-snug text-foreground">{item.message}</p>
+                  <p className="flex-1 leading-snug text-foreground">{t(item.message)}</p>
                   <button
                     type="button"
                     onClick={() => dismiss(item.id)}
-                    aria-label="Закрыть уведомление"
+                    aria-label={t('Закрыть уведомление')}
                     className="rounded-control p-0.5 text-muted-foreground transition-colors hover:text-foreground"
                   >
                     <X className="h-3.5 w-3.5" aria-hidden="true" />

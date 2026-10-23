@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 export interface DialogProps {
   open: boolean;
@@ -48,6 +49,7 @@ export function Dialog({
   size = 'md',
   className,
 }: DialogProps) {
+  const t = useT();
   const panelRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
   const uid = useId();
@@ -159,7 +161,7 @@ export function Dialog({
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="Закрыть окно"
+                aria-label={t('Закрыть окно')}
                 className="-mr-1 rounded-control p-1.5 text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground"
               >
                 <X className="h-4 w-4" aria-hidden="true" />

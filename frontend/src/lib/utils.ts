@@ -1,6 +1,7 @@
 /**
  * Small, dependency-free helpers shared across the app.
  */
+import { intlLocale, translate, type Locale } from '@/lib/i18n/core';
 
 /** Joins conditional class names. Falsy values are dropped. */
 export function cn(...values: Array<string | false | null | undefined>): string {
@@ -51,6 +52,7 @@ export function formatTime(value: string | number | Date | undefined | null): st
 /** Human friendly relative time, e.g. `2 ч. назад`. */
 export function formatRelativeTime(
   value: string | number | Date | undefined | null,
+  locale: Locale = 'ru',
 ): string {
   if (!value) return '';
   const date = new Date(value);
@@ -58,7 +60,7 @@ export function formatRelativeTime(
 
   const diffSeconds = Math.round((Date.now() - date.getTime()) / 1000);
 
-  if (diffSeconds < 60) return 'только что';
+  if (diffSeconds < 60) return translate(locale, 'только что');
 
   const units: Array<[Intl.RelativeTimeFormatUnit, number]> = [
     ['minute', 60],
@@ -81,7 +83,7 @@ export function formatRelativeTime(
     }
   }
 
-  return new Intl.RelativeTimeFormat('ru-RU', { numeric: 'auto' }).format(
+  return new Intl.RelativeTimeFormat(intlLocale(locale), { numeric: 'auto' }).format(
     -seconds,
     unit,
   );
@@ -101,6 +103,41 @@ export function getInitials(value: string | undefined | null): string {
 /** First letter of a name, used for the compact avatar fallback. */
 export function getFirstLetter(value: string | undefined | null): string {
   return value?.trim().charAt(0).toUpperCase() || '?';
+}
+
+/** Image types and size limit accepted by the backend upload endpoints (multer). */
+export const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+export const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Validates a file against the backend upload rules (JPG / PNG / WEBP, up to
+ * 5 MB). Returns a human readable error, or `null` when the file is valid.
+ */
+export function validateImageFile(file: File): string | null {
+  if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+    return 'Допустимы только изображения JPG, PNG или WEBP';
+  }
+  if (file.size > MAX_IMAGE_SIZE_BYTES) {
+    return 'Размер файла не должен превышать 5 МБ';
+  }
+  return null;
+}
+
+/** Picks the most useful message out of a failed RTK Query / API error. */
+export function getErrorMessage(error: unknown, fallback: string): string {
+  if (error && typeof error === 'object' && 'message' in error) {
+    const message = (error as { message?: unknown }).message;
+    if (typeof message === 'string' && message.trim()) return message;
+  }
+  return fallback;
+}
+
+/** Accepts only same-site relative paths, protecting against open redirects. */
+export function safeRedirectPath(value: string | null | undefined, fallback = '/feed'): string {
+  if (!value || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) {
+    return fallback;
+  }
+  return value;
 }
 
 /** `true` when the value is a valid, non-empty http(s) URL. */

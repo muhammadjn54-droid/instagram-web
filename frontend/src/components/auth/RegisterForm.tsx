@@ -11,28 +11,34 @@ import { z } from 'zod';
 import { AuthFormCard } from './AuthFormCard';
 import { Input } from '@/components/ui/Input';
 import { useRegisterMutation } from '@/features/account/accountApi';
+import { igApi } from '@/store/api/baseApi';
+import { useAppDispatch } from '@/store/hooks';
+import { useT } from '@/lib/i18n/LocaleProvider';
+import { tr } from '@/lib/i18n/core';
 
 const registerSchema = z
   .object({
-    fullName: z.string().trim().min(2, 'Укажите имя и фамилию'),
+    fullName: z.string().trim().min(2, tr('Укажите имя и фамилию')),
     userName: z
       .string()
       .trim()
-      .min(3, 'Минимум 3 символа')
-      .regex(/^[a-zA-Z0-9._]+$/, 'Только латиница, цифры, точка и подчёркивание'),
-    email: z.string().trim().email('Некорректный e-mail'),
-    password: z.string().min(6, 'Минимум 6 символов'),
-    confirmPassword: z.string().min(6, 'Минимум 6 символов'),
+      .min(3, tr('Минимум 3 символа'))
+      .regex(/^[a-zA-Z0-9._]+$/, tr('Только латиница, цифры, точка и подчёркивание')),
+    email: z.string().trim().email(tr('Некорректный e-mail')),
+    password: z.string().min(6, tr('Минимум 6 символов')),
+    confirmPassword: z.string().min(6, tr('Минимум 6 символов')),
   })
   .refine((values) => values.password === values.confirmPassword, {
-    message: 'Пароли не совпадают',
+    message: tr('Пароли не совпадают'),
     path: ['confirmPassword'],
   });
 
 type RegisterValues = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
+  const t = useT();
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [register, { isLoading, error }] = useRegisterMutation();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -54,6 +60,7 @@ export function RegisterForm() {
   const onSubmit = handleSubmit(async (formValues) => {
     try {
       await register(formValues).unwrap();
+      dispatch(igApi.util.resetApiState());
       router.replace('/feed');
       router.refresh();
     } catch {
@@ -63,47 +70,47 @@ export function RegisterForm() {
 
   return (
     <AuthFormCard
-      title="Регистрация в Instagram"
-      description="Зарегистрируйтесь, чтобы смотреть фото и видео ваших друзей."
+      title={t('Регистрация в Instagram')}
+      description={t('Зарегистрируйтесь, чтобы смотреть фото и видео ваших друзей.')}
       error={error?.message}
     >
       <form onSubmit={onSubmit} noValidate className="space-y-3">
         <Input
           type="email"
-          placeholder="Электронный адрес"
+          placeholder={t('Электронный адрес')}
           autoComplete="email"
-          aria-label="Электронный адрес"
-          error={errors.email?.message}
+          aria-label={t('Электронный адрес')}
+          error={t(errors.email?.message)}
           {...registerField('email')}
         />
 
         <Input
-          placeholder="Имя и фамилия"
+          placeholder={t('Имя и фамилия')}
           autoComplete="name"
-          aria-label="Имя и фамилия"
-          error={errors.fullName?.message}
+          aria-label={t('Имя и фамилия')}
+          error={t(errors.fullName?.message)}
           {...registerField('fullName')}
         />
 
         <Input
-          placeholder="Имя пользователя"
+          placeholder={t('Имя пользователя')}
           autoComplete="username"
-          aria-label="Имя пользователя"
-          error={errors.userName?.message}
+          aria-label={t('Имя пользователя')}
+          error={t(errors.userName?.message)}
           {...registerField('userName')}
         />
 
         <Input
           type={showPassword ? 'text' : 'password'}
-          placeholder="Пароль (минимум 6 символов)"
+          placeholder={t('Пароль (минимум 6 символов)')}
           autoComplete="new-password"
-          aria-label="Пароль"
-          error={errors.password?.message}
+          aria-label={t('Пароль')}
+          error={t(errors.password?.message)}
           addon={
             <button
               type="button"
               onClick={() => setShowPassword((value) => !value)}
-              aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+              aria-label={showPassword ? t('Скрыть пароль') : t('Показать пароль')}
               className="text-neutral-500 hover:text-neutral-900 transition-colors"
             >
               {showPassword ? (
@@ -118,16 +125,15 @@ export function RegisterForm() {
 
         <Input
           type={showPassword ? 'text' : 'password'}
-          placeholder="Подтверждение пароля"
+          placeholder={t('Подтверждение пароля')}
           autoComplete="new-password"
-          aria-label="Подтверждение пароля"
-          error={errors.confirmPassword?.message}
+          aria-label={t('Подтверждение пароля')}
+          error={t(errors.confirmPassword?.message)}
           {...registerField('confirmPassword')}
         />
 
         <p className="py-1 text-[11px] leading-normal text-neutral-400">
-          Регистрируясь, вы принимаете наши Условия, Политику конфиденциальности и
-          Политику в отношении файлов cookie.
+          {t('Регистрируясь, вы принимаете наши Условия, Политику конфиденциальности и Политику в отношении файлов cookie.')}
         </p>
 
         <button
@@ -138,7 +144,7 @@ export function RegisterForm() {
           {isLoading ? (
             <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            'Зарегистрироваться'
+            t('Зарегистрироваться')
           )}
         </button>
       </form>
@@ -149,7 +155,7 @@ export function RegisterForm() {
           href="/login"
           className="w-full py-2.5 sm:py-3 border border-[#0095F6] text-[#0095F6] hover:bg-[#0095F6]/5 active:bg-[#0095F6]/10 font-semibold text-[14px] rounded-[12px] transition flex items-center justify-center text-center"
         >
-          Есть аккаунт? Войти
+          {t('Есть аккаунт? Войти')}
         </Link>
       </div>
     </AuthFormCard>

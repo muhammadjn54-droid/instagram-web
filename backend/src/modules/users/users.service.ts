@@ -104,7 +104,8 @@ export class UsersService {
       id: user.id,
       userName: user.userName,
       fullName: user.fullName,
-      email: user.email,
+      // E-mail addresses are private: only the owner sees their own.
+      email: currentUserId === user.id ? user.email : '',
       bio: user.profile?.bio || '',
       avatar: user.profile?.avatar || '',
       website: user.profile?.website || '',

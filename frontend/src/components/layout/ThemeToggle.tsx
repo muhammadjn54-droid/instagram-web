@@ -3,23 +3,13 @@
 import { useCallback, useSyncExternalStore } from 'react';
 import { Moon, Sun } from 'lucide-react';
 
-const STORAGE_KEY = 'ig-theme';
-
-type Theme = 'light' | 'dark';
+import { applyTheme, writeThemeCookie, type Theme } from '@/lib/theme';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 const listeners = new Set<() => void>();
 
-let currentTheme: Theme | null = null;
-
-function readStoredTheme(): Theme {
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (stored === 'dark' || stored === 'light') return stored;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
 function getSnapshot(): Theme {
-  currentTheme ??= readStoredTheme();
-  return currentTheme;
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 }
 
 function getServerSnapshot(): Theme {
@@ -33,27 +23,20 @@ function subscribe(callback: () => void) {
   };
 }
 
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  root.classList.toggle('dark', theme === 'dark');
-  root.style.colorScheme = theme;
-}
-
 function updateTheme(theme: Theme) {
-  currentTheme = theme;
   applyTheme(theme);
-  window.localStorage.setItem(STORAGE_KEY, theme);
+  writeThemeCookie(theme);
   listeners.forEach((listener) => listener());
 }
 
 /**
  * Light/dark switch.
  *
- * The choice is persisted in `localStorage` and applied before hydration by
- * the inline script in `src/app/layout.tsx`, so there is no flash of the
- * wrong theme.
+ * The choice is persisted in a cookie (`src/lib/theme.ts`); the root layout
+ * reads it on the server, so there is no flash of the wrong theme.
  */
 export function ThemeToggle({ className }: { className?: string }) {
+  const t = useT();
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const toggle = useCallback(() => {
@@ -64,7 +47,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     <button
       type="button"
       onClick={toggle}
-      aria-label={theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему'}
+      aria-label={theme === 'dark' ? t('Включить светлую тему') : t('Включить тёмную тему')}
       aria-pressed={theme === 'dark'}
       className={
         className ??

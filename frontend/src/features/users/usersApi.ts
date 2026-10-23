@@ -35,6 +35,7 @@ const usersApi = igApi.injectEndpoints({
         { type: 'Profile' as const, id: userId },
         { type: 'Profile' as const, id: 'LIST' as const },
         { type: 'Post' as const, id: 'LIST' as const },
+        'Notification',
       ],
     }),
 
@@ -45,6 +46,7 @@ const usersApi = igApi.injectEndpoints({
         { type: 'Profile' as const, id: userId },
         { type: 'Profile' as const, id: 'LIST' as const },
         { type: 'Post' as const, id: 'LIST' as const },
+        'Notification',
       ],
     }),
 

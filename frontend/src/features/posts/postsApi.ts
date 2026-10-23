@@ -24,7 +24,10 @@ const postsApi = igApi.injectEndpoints({
         url: API_ROUTES.posts.feed,
         params: { pageNumber: params.pageNumber ?? 1, pageSize: params.pageSize ?? 10 },
       }),
-      providesTags: ['Post'],
+      providesTags: (result) => [
+        { type: 'Post' as const, id: 'LIST' as const },
+        ...(result?.items ?? []).map((item) => ({ type: 'Post' as const, id: item.id })),
+      ],
     }),
 
     getPosts: builder.query<PagedResult<Post>, PostQuery>({
@@ -38,7 +41,10 @@ const postsApi = igApi.injectEndpoints({
           ...(params.isReel !== undefined ? { isReel: params.isReel } : {}),
         },
       }),
-      providesTags: ['Post'],
+      providesTags: (result) => [
+        { type: 'Post' as const, id: 'LIST' as const },
+        ...(result?.items ?? []).map((item) => ({ type: 'Post' as const, id: item.id })),
+      ],
     }),
 
     getReels: builder.query<PagedResult<Post>, PaginationQuery>({
@@ -46,7 +52,10 @@ const postsApi = igApi.injectEndpoints({
         url: API_ROUTES.posts.reels,
         params: { pageNumber: params.pageNumber ?? 1, pageSize: params.pageSize ?? 10 },
       }),
-      providesTags: ['Post'],
+      providesTags: (result) => [
+        { type: 'Post' as const, id: 'LIST' as const },
+        ...(result?.items ?? []).map((item) => ({ type: 'Post' as const, id: item.id })),
+      ],
     }),
 
     getMyPosts: builder.query<PagedResult<Post>, PaginationQuery>({
@@ -54,7 +63,10 @@ const postsApi = igApi.injectEndpoints({
         url: API_ROUTES.posts.mine,
         params: { pageNumber: params.pageNumber ?? 1, pageSize: params.pageSize ?? 12 },
       }),
-      providesTags: ['Post'],
+      providesTags: (result) => [
+        { type: 'Post' as const, id: 'LIST' as const },
+        ...(result?.items ?? []).map((item) => ({ type: 'Post' as const, id: item.id })),
+      ],
     }),
 
     getPost: builder.query<Post, number>({
@@ -102,18 +114,12 @@ const postsApi = igApi.injectEndpoints({
 
     likePost: builder.mutation<string, number>({
       query: (id) => ({ url: API_ROUTES.posts.like(id), method: 'POST' }),
-      invalidatesTags: (result, _error, id) => [
-        { type: 'Post' as const, id },
-        { type: 'Post' as const, id: 'LIST' as const },
-      ],
+      invalidatesTags: (result, _error, id) => [{ type: 'Post' as const, id }],
     }),
 
     unlikePost: builder.mutation<string, number>({
       query: (id) => ({ url: API_ROUTES.posts.like(id), method: 'DELETE' }),
-      invalidatesTags: (result, _error, id) => [
-        { type: 'Post' as const, id },
-        { type: 'Post' as const, id: 'LIST' as const },
-      ],
+      invalidatesTags: (result, _error, id) => [{ type: 'Post' as const, id }],
     }),
 
     recordPostView: builder.mutation<string, number>({
@@ -144,6 +150,7 @@ export const {
   useGetReelsQuery,
   useGetMyPostsQuery,
   useGetPostQuery,
+  useLazyGetPostQuery,
   useCreatePostMutation,
   useUpdatePostMutation,
   useDeletePostMutation,

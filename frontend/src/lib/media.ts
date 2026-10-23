@@ -17,7 +17,7 @@ export const MEDIA_BASE_URL = (
 export function getMediaUrl(path?: string | null): string | null {
   if (!path) return null;
   if (path.startsWith('http://') || path.startsWith('https://')) return path;
-  if (path.startsWith('data:')) return path;
+  if (path.startsWith('data:') || path.startsWith('blob:')) return path;
   return `${MEDIA_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 }
 

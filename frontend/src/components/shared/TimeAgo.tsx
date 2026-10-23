@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
+import { useLocale } from '@/lib/i18n/LocaleProvider';
 import { formatRelativeTime } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +21,7 @@ export function TimeAgo({
   className?: string;
   intervalMs?: number;
 }) {
+  const { locale } = useLocale();
   const [, forceRender] = useState(0);
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export function TimeAgo({
 
   return (
     <time dateTime={new Date(value).toISOString()} className={cn(className)}>
-      {formatRelativeTime(value)}
+      {formatRelativeTime(value, locale)}
     </time>
   );
 }

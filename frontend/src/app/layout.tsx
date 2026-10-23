@@ -1,21 +1,33 @@
 import type { Metadata, Viewport } from 'next';
+import { cookies } from 'next/headers';
 import { connection } from 'next/server';
 import './globals.css';
 
 import { StoreProvider } from '@/store/provider';
 import { ToastProvider } from '@/components/ui/Toast';
+import { ThemeSync } from '@/components/layout/ThemeSync';
+import { THEME_COOKIE } from '@/lib/theme';
+import { LocaleProvider } from '@/lib/i18n/LocaleProvider';
+import { getLocale, getT } from '@/lib/i18n/server';
 
-export const metadata: Metadata = {
-  title: {
-    default: 'Instagram',
-    template: '%s — Instagram',
-  },
-  description:
-    'Посмотрите, какими моментами из жизни поделились ваши близкие друзья.',
-  icons: {
-    icon: '/favicon.ico',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+
+  return {
+    title: {
+      default: 'Instagram',
+      template: '%s — Instagram',
+    },
+    description: t('Посмотрите, какими моментами из жизни поделились ваши близкие друзья.'),
+    icons: {
+      icon: '/favicon.ico',
+    },
+    // The interface has its own language switch (Русский / English). Browser
+    // auto-translation rewrites the text nodes behind React's back and crashes
+    // it ("insertBefore" errors).
+    other: { google: 'notranslate' },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -23,23 +35,6 @@ export const viewport: Viewport = {
     { media: '(prefers-color-scheme: dark)', color: '#0b0b0d' },
   ],
 };
-
-/**
- * Inline script that applies the saved theme before the first paint.
- *
- * It must stay synchronous and dependency free — otherwise the page flashes
- * in the wrong theme.
- */
-const themeScript = `
-(function () {
-  try {
-    var stored = localStorage.getItem('ig-theme');
-    var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-    document.documentElement.classList.toggle('dark', dark);
-    document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
-  } catch (error) {}
-})();
-`;
 
 /**
  * The whole application is rendered at request time.
@@ -63,15 +58,27 @@ export default async function RootLayout({
 }) {
   await connection();
 
+  // The theme is stored in a cookie so the server can render the right class
+  // immediately: no inline <script> (React warns about scripts in components)
+  // and no flash of the wrong theme.
+  const dark = (await cookies()).get(THEME_COOKIE)?.value === 'dark';
+  const locale = await getLocale();
+
   return (
-    <html lang="ru" className="h-full" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
+    <html
+      lang={locale}
+      translate="no"
+      className={dark ? 'dark h-full' : 'h-full'}
+      style={dark ? { colorScheme: 'dark' } : undefined}
+      suppressHydrationWarning
+    >
       <body className="min-h-full bg-background font-sans text-foreground">
-        <StoreProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </StoreProvider>
+        <ThemeSync />
+        <LocaleProvider initialLocale={locale}>
+          <StoreProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </StoreProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

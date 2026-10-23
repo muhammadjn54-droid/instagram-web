@@ -1,5 +1,8 @@
 # BACKEND READINESS — what the backend still owes the frontend
 
+> **STATUS NOTE (2026-10-23):** **all items are resolved** — every module is registered in `AppModule`, the interceptor/filter/guard are global, the database is connected. See `../../backend/API_CONTRACT.md`.
+
+
 | Field | Value |
 |---|---|
 | Backend | `backend/` (NestJS 12, TypeORM 1.x, SQLite) |
