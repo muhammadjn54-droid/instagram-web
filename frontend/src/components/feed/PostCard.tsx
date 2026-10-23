@@ -146,7 +146,7 @@ export function PostCard({ post, detailed = false, owned = false, className }: P
       </header>
 
       <Link href={`/post/${post.id}`} aria-label={`Открыть публикацию ${post.title ?? ''}`}>
-        <PostCarousel images={post.images} alt={post.title ?? post.content} />
+        <PostCarousel images={post.images} alt={post.title ?? post.content} isReel={post.isReel} />
       </Link>
 
       <div className="space-y-2 px-4 py-3">
