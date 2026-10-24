@@ -29,17 +29,14 @@ import { CREATE_NAV_ITEM, PRIMARY_NAV_ITEMS, isActivePath } from './navItems';
 import { useLocale, useT } from '@/lib/i18n/LocaleProvider';
 
 /** Text next to an icon: hidden while the rail is collapsed, shown when it expands. */
-const LABEL =
-  'whitespace-nowrap opacity-0 transition-opacity duration-150 ' +
-  'group-hover/sidebar:opacity-100 group-has-[:focus-visible]/sidebar:opacity-100 ' +
-  'group-data-[expanded=true]/sidebar:opacity-100';
+const LABEL = 'sr-only';
 
 const ROW =
-  'group/row flex h-12 w-full items-center gap-4 rounded-lg px-3 text-[15px] text-foreground ' +
-  'transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted';
+  'group/row flex h-12 w-12 items-center justify-center rounded-xl text-neutral-200 ' +
+  'transition-all hover:bg-[#1a1a1a] hover:text-white hover:scale-105 active:scale-95';
 
 const ICON_BOX =
-  'flex h-6 w-6 shrink-0 items-center justify-center transition-transform duration-150 group-hover/row:scale-110';
+  'flex h-6 w-6 shrink-0 items-center justify-center';
 
 /**
  * Desktop navigation rail.
@@ -113,23 +110,15 @@ export function Sidebar() {
       <aside
         ref={railRef}
         aria-label={t('Основная навигация')}
-        data-expanded={moreOpen}
-        className={cn(
-          'group/sidebar fixed inset-y-0 left-0 z-40 hidden w-[72px] flex-col border-r border-border bg-surface',
-          'px-3 pb-5 pt-6 transition-[width] duration-200 ease-out lg:flex',
-          'hover:w-[244px] has-[:focus-visible]:w-[244px] data-[expanded=true]:w-[244px]',
-        )}
+        className="fixed inset-y-0 left-0 z-40 hidden w-[72px] flex-col items-center border-r border-[#262626] bg-black px-2 pb-5 pt-6 lg:flex"
       >
         <Link
           href="/feed"
           onClick={closeMenus}
           aria-label={t('Instagram — на главную')}
-          className="mb-5 flex h-12 w-full items-center gap-4 rounded-lg px-3 hover:bg-surface-muted"
+          className="mb-6 flex h-11 w-11 items-center justify-center rounded-xl text-white transition-transform hover:scale-110"
         >
-          <Logo showWordmark={false} iconClassName="h-6 w-6 rounded-[8px]" />
-          <span className={cn(LABEL, 'text-xl font-bold tracking-tight text-foreground')}>
-            Instagram
-          </span>
+          <Logo showWordmark={false} iconClassName="h-7 w-7 rounded-[9px]" />
         </Link>
 
         <nav className="flex flex-1 flex-col gap-1">

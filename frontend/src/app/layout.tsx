@@ -61,7 +61,8 @@ export default async function RootLayout({
   // The theme is stored in a cookie so the server can render the right class
   // immediately: no inline <script> (React warns about scripts in components)
   // and no flash of the wrong theme.
-  const dark = (await cookies()).get(THEME_COOKIE)?.value === 'dark';
+  const themeCookie = (await cookies()).get(THEME_COOKIE)?.value;
+  const dark = themeCookie ? themeCookie === 'dark' : true;
   const locale = await getLocale();
 
   return (

@@ -84,7 +84,7 @@ export function PostCard({ post, detailed = false, owned, onDeleted, className }
   return (
     <article
       className={cn(
-        'overflow-hidden rounded-card border border-border bg-surface shadow-card',
+        'overflow-hidden rounded-none sm:rounded-[8px] border-b sm:border border-[#262626] bg-black pb-2 text-white',
         className,
       )}
     >
