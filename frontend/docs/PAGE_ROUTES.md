@@ -1,5 +1,8 @@
 # PAGE ROUTES — Frontend route map
 
+> **STATUS NOTE (2026-10-23):** historical plan. The real route map is in `../../specs/ROUTE_INVENTORY.md`.
+
+
 | Field | Value |
 |---|---|
 | Applies to | `frontend/src/app/**` |

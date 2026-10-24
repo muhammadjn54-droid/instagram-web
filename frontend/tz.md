@@ -1,26 +1,21 @@
 # TZ — Frontend Technical Specification & Progress Tracker
 
-> **Notice:** This document mirrors the root master tracker at [`../tz.md`](../tz.md) and links to the comprehensive 20-file specification suite in [`../specs/`](../specs/).
+> **Notice:** this file mirrors the root master tracker [`../tz.md`](../tz.md) and links to the specification suite in [`../specs/`](../specs/). The root file is the source of truth.
 
----
-
-## 1. System Overview
+## 1. System overview
 
 | Field | Value |
 |---|---|
-| System | Instagram-like Social Network — Web Frontend |
-| Package | `frontend/` (Next.js App Router monorepo app) |
-| Baseline | Next.js `16.4.2`, React `19.3.0`, Tailwind CSS `v4`, Turbopack |
-| Backend | `backend/` (NestJS 12 + TypeORM + SQLite), Swagger at `/swagger` |
-| Master Tracker | [`../tz.md`](../tz.md) |
-| Specifications | [`../specs/`](../specs/) |
+| System | Instagram-like social network — web frontend |
+| Package | `frontend/` (Next.js App Router) |
+| Baseline | Next.js `16.4.2`, React `19.3.0`, Tailwind CSS `v4`, Turbopack, RTK Query |
+| Backend | `backend/` (NestJS + TypeORM + SQLite), Swagger at `/swagger` |
+| Data flow | Browser → `/api/backend/*` (Next.js BFF proxy, adds the httpOnly JWT) → NestJS |
 
----
+## 2. Progress (2026-10-23)
 
-## 2. Implementation Progress Summary
-
-* **Phase 1 (Documentation & Specifications):** **COMPLETE** — 20 detailed specifications created in `specs/`.
-* **Authentication Module (`/login`, `/register`):** **COMPLETE** — Verified with backend API, email login support, and Russian localized UI.
-* **Phase 2 (Application Shell & Navigation):** **READY TO START** — Desktop Sidebar, Mobile Bottom Bar, and Route Guard.
-
-For full feature checklists and task IDs, please refer to the root master tracker: [`../tz.md`](../tz.md).
+* **Phase 1 — documentation:** complete.
+* **Phase 2 — application shell:** complete (`Sidebar`, `TopBar`, `MobileNav`, `SessionGuard`, `proxy.ts`).
+* **Phases 3–6 — feed, stories, create, profile, chat, search, explore, reels:** functionally complete, see the module table in the root `tz.md` §4.
+* **Current phase — functions & bugs:** 6 backend + 16 frontend defects fixed (root `tz.md` §3). Remaining function gaps are listed in §5 of the root file.
+* **Next phase — UI polish:** waits for the design images.

@@ -135,29 +135,6 @@ export interface UpdatePostInput {
   locationId?: number;
 }
 
-/**
- * `GET /profiles/me/favorites` returns raw TypeORM entities (not `PostDto`),
- * so the payload is shaped differently from every other post list.
- * See `specs/API_INTEGRATION.md` → "Known contract inconsistencies".
- */
-export interface FavoritePost {
-  id: number;
-  userId: number;
-  title?: string;
-  content: string;
-  isReel: boolean;
-  createdAt: string;
-  images?: Array<{ id: number; url: string; order: number }>;
-  user?: {
-    id: number;
-    userName: string;
-    fullName: string;
-    avatar?: string;
-    profile?: { avatar: string };
-  };
-  location?: { id: number; name: string; city?: string; country?: string };
-}
-
 /* ----------------------------------------------------------------- profile */
 
 export const Gender = {
@@ -334,4 +311,29 @@ export interface SearchHistoryItem {
 export interface CreateSearchHistoryInput {
   text?: string;
   searchedUserId?: number;
+}
+
+/* ----------------------------------------------------------- notifications */
+
+export type NotificationType = 'follow' | 'like' | 'comment' | 'story_like';
+
+export interface NotificationActor {
+  id: number;
+  userName: string;
+  fullName: string;
+  avatar: string;
+  /** The signed-in user follows this person. */
+  isFollowing: boolean;
+}
+
+export interface Notification {
+  /** Stable key, `<type>-<row id>`. */
+  id: string;
+  type: NotificationType;
+  actor: NotificationActor;
+  /** Comment text for `comment`. */
+  text?: string;
+  /** Post (or story) the event is about. */
+  target?: { postId?: number; image?: string };
+  createdAt: string;
 }

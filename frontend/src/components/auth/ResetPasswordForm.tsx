@@ -9,22 +9,25 @@ import { z } from 'zod';
 import { AuthFormCard } from './AuthFormCard';
 import { Input } from '@/components/ui/Input';
 import { useResetPasswordMutation } from '@/features/account/accountApi';
+import { useT } from '@/lib/i18n/LocaleProvider';
+import { tr } from '@/lib/i18n/core';
 
 const schema = z
   .object({
-    token: z.string().trim().min(1, 'Укажите токен восстановления'),
-    email: z.string().trim().email('Некорректный e-mail'),
-    password: z.string().min(6, 'Минимум 6 символов'),
-    confirmPassword: z.string().min(6, 'Минимум 6 символов'),
+    token: z.string().trim().min(1, tr('Укажите токен восстановления')),
+    email: z.string().trim().email(tr('Некорректный e-mail')),
+    password: z.string().min(6, tr('Минимум 6 символов')),
+    confirmPassword: z.string().min(6, tr('Минимум 6 символов')),
   })
   .refine((values) => values.password === values.confirmPassword, {
-    message: 'Пароли не совпадают',
+    message: tr('Пароли не совпадают'),
     path: ['confirmPassword'],
   });
 
 type Values = z.infer<typeof schema>;
 
 export function ResetPasswordForm() {
+  const t = useT();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -56,53 +59,53 @@ export function ResetPasswordForm() {
 
   return (
     <AuthFormCard
-      title="Новый пароль"
-      description="Введите токен восстановления и задайте новый пароль."
+      title={t('Новый пароль')}
+      description={t('Введите токен восстановления и задайте новый пароль.')}
       error={error?.message}
-      success={isSuccess ? 'Пароль обновлён. Перенаправляем ко входу…' : undefined}
+      success={isSuccess ? t('Пароль обновлён. Перенаправляем ко входу…') : undefined}
       footer={
         <div className="mt-4">
           <Link
             href="/login"
             className="w-full py-2.5 sm:py-3 border border-[#0095F6] text-[#0095F6] hover:bg-[#0095F6]/5 font-semibold text-[14px] rounded-[12px] transition flex items-center justify-center text-center"
           >
-            Вернуться ко входу
+            {t('Вернуться ко входу')}
           </Link>
         </div>
       }
     >
       <form onSubmit={onSubmit} noValidate className="space-y-3.5">
         <Input
-          placeholder="Токен восстановления"
-          aria-label="Токен восстановления"
-          error={errors.token?.message}
+          placeholder={t('Токен восстановления')}
+          aria-label={t('Токен восстановления')}
+          error={t(errors.token?.message)}
           {...register('token')}
         />
 
         <Input
           type="email"
-          placeholder="Электронный адрес"
+          placeholder={t('Электронный адрес')}
           autoComplete="email"
-          aria-label="Электронный адрес"
-          error={errors.email?.message}
+          aria-label={t('Электронный адрес')}
+          error={t(errors.email?.message)}
           {...register('email')}
         />
 
         <Input
           type="password"
-          placeholder="Новый пароль (минимум 6 символов)"
+          placeholder={t('Новый пароль (минимум 6 символов)')}
           autoComplete="new-password"
-          aria-label="Новый пароль"
-          error={errors.password?.message}
+          aria-label={t('Новый пароль')}
+          error={t(errors.password?.message)}
           {...register('password')}
         />
 
         <Input
           type="password"
-          placeholder="Подтверждение пароля"
+          placeholder={t('Подтверждение пароля')}
           autoComplete="new-password"
-          aria-label="Подтверждение пароля"
-          error={errors.confirmPassword?.message}
+          aria-label={t('Подтверждение пароля')}
+          error={t(errors.confirmPassword?.message)}
           {...register('confirmPassword')}
         />
 
@@ -114,7 +117,7 @@ export function ResetPasswordForm() {
           {isLoading ? (
             <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            'Сохранить пароль'
+            t('Сохранить пароль')
           )}
         </button>
       </form>

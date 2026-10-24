@@ -10,15 +10,18 @@ import { Card } from '@/components/ui/States';
 import { Input } from '@/components/ui/Input';
 import { useToast } from '@/components/ui/Toast';
 import { useChangePasswordMutation } from '@/features/account/accountApi';
+import { getErrorMessage } from '@/lib/utils';
+import { useT } from '@/lib/i18n/LocaleProvider';
+import { tr } from '@/lib/i18n/core';
 
 const schema = z
   .object({
-    oldPassword: z.string().min(1, 'Введите текущий пароль'),
-    password: z.string().min(6, 'Минимум 6 символов'),
-    confirmPassword: z.string().min(6, 'Минимум 6 символов'),
+    oldPassword: z.string().min(1, tr('Введите текущий пароль')),
+    password: z.string().min(6, tr('Минимум 6 символов')),
+    confirmPassword: z.string().min(6, tr('Минимум 6 символов')),
   })
   .refine((values) => values.password === values.confirmPassword, {
-    message: 'Пароли не совпадают',
+    message: tr('Пароли не совпадают'),
     path: ['confirmPassword'],
   });
 
@@ -28,6 +31,7 @@ type Values = z.infer<typeof schema>;
  * Password change form.
  */
 export function PasswordForm() {
+  const t = useT();
   const { toast } = useToast();
   const [changePassword, { isLoading }] = useChangePasswordMutation();
   const [done, setDone] = useState(false);
@@ -47,9 +51,10 @@ export function PasswordForm() {
       await changePassword(values).unwrap();
       setDone(true);
       reset();
-      toast('Пароль обновлён', 'success');
-    } catch {
-      toast('Не удалось изменить пароль', 'error');
+      toast(t('Пароль обновлён'), 'success');
+    } catch (error) {
+      setDone(false);
+      toast(getErrorMessage(error, t('Не удалось изменить пароль')), 'error');
     }
   });
 
@@ -57,37 +62,37 @@ export function PasswordForm() {
     <Card className="p-4 sm:p-5">
       <form onSubmit={onSubmit} noValidate className="space-y-4">
         <Input
-          label="Текущий пароль"
+          label={t('Текущий пароль')}
           type="password"
           autoComplete="current-password"
-          error={errors.oldPassword?.message}
+          error={t(errors.oldPassword?.message)}
           {...register('oldPassword')}
         />
 
         <Input
-          label="Новый пароль"
+          label={t('Новый пароль')}
           type="password"
           autoComplete="new-password"
-          hint="Минимум 6 символов"
-          error={errors.password?.message}
+          hint={t('Минимум 6 символов')}
+          error={t(errors.password?.message)}
           {...register('password')}
         />
 
         <Input
-          label="Подтверждение нового пароля"
+          label={t('Подтверждение нового пароля')}
           type="password"
           autoComplete="new-password"
-          error={errors.confirmPassword?.message}
+          error={t(errors.confirmPassword?.message)}
           {...register('confirmPassword')}
         />
 
         <div className="flex items-center gap-3">
           <Button type="submit" loading={isLoading}>
-            Обновить пароль
+            {t('Обновить пароль')}
           </Button>
 
           {done ? (
-            <span className="text-xs font-medium text-success">Пароль обновлён</span>
+            <span className="text-xs font-medium text-success">{t('Пароль обновлён')}</span>
           ) : null}
         </div>
       </form>

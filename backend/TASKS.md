@@ -1,5 +1,8 @@
 # TASKS — work items of the Instagram-like API
 
+> **STATUS NOTE (2026-10-23):** this checklist was written on 2026-10-21 **before** the modules were built and is historical. All 11 modules, the database, guards, validation, Swagger, uploads and the seed now exist and work — see `API_CONTRACT.md` (verified list of 64 endpoints) and the root `../tz.md`. The "Known bugs" table below is closed except: no admin check for locations, no rate limiting, hard-coded fallback `JWT_SECRET` (see `../specs/SECURITY.md` §4).
+
+
 | Field | Value |
 |---|---|
 | Version | v0.1 |

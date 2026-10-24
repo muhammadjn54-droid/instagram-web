@@ -1,6 +1,9 @@
+'use client';
+
 import { Eye, Heart, Star } from 'lucide-react';
 
 import { Logo } from '@/components/layout/Logo';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 /**
  * Marketing column of the authentication screens.
@@ -8,6 +11,7 @@ import { Logo } from '@/components/layout/Logo';
  * Server Component: it contains no state and no interactivity.
  */
 export function AuthHero() {
+  const t = useT();
   return (
     <div className="flex w-full max-w-[540px] flex-col justify-between">
       <div className="mb-6">
@@ -15,11 +19,11 @@ export function AuthHero() {
       </div>
 
       <h1 className="mb-8 text-3xl font-semibold leading-[1.25] tracking-tight text-neutral-900 sm:text-4xl lg:text-[40px]">
-        Посмотрите, какими моментами из жизни поделились ваши{' '}
+        {t('Посмотрите, какими моментами из жизни поделились ваши')}{' '}
         <span className="bg-gradient-to-r from-[#ff7a00] to-[#ff0169] bg-clip-text text-transparent">
-          близкие
+          {t('близкие')}
         </span>{' '}
-        <span className="text-[#d62976]">друзья</span>.
+        <span className="text-[#d62976]">{t('друзья')}</span>.
       </h1>
 
       <div className="relative flex h-[400px] w-full items-center justify-center select-none">
@@ -32,7 +36,7 @@ export function AuthHero() {
           {/* eslint-disable-next-line @next/next/no-img-element -- local static asset in /public */}
           <img
             src="/images/neon-story.jpg"
-            alt="Пример истории"
+            alt={t('Пример истории')}
             className="h-full w-full object-cover"
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60" />
@@ -45,7 +49,7 @@ export function AuthHero() {
           {/* eslint-disable-next-line @next/next/no-img-element -- local static asset in /public */}
           <img
             src="/images/friends-story.jpg"
-            alt="История близких друзей"
+            alt={t('История близких друзей')}
             className="h-full w-full object-cover"
           />
 
@@ -60,12 +64,12 @@ export function AuthHero() {
                   {/* eslint-disable-next-line @next/next/no-img-element -- local static asset in /public */}
                   <img
                     src="/images/friends-story.jpg"
-                    alt="Аватар автора истории"
+                    alt={t('Аватар автора истории')}
                     className="h-full w-full object-cover"
                   />
                 </span>
                 <span>chloe</span>
-                <span className="font-normal text-white/70">2 ч.</span>
+                <span className="font-normal text-white/70">{t('2 ч.')}</span>
               </span>
               <span className="text-white/80">•••</span>
             </div>
@@ -73,7 +77,7 @@ export function AuthHero() {
 
           <div className="absolute left-3 top-16 flex items-center gap-1.5 rounded-pill border border-white/30 bg-neutral-900/80 px-2.5 py-1 text-xs text-white backdrop-blur-md">
             <Eye className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>Только близкие</span>
+            <span>{t('Только близкие')}</span>
           </div>
 
           <div className="absolute right-3 top-28 flex h-6 w-6 items-center justify-center rounded-pill border border-white/60 bg-[#00C73C] text-xs font-bold text-white shadow-md">
@@ -84,14 +88,14 @@ export function AuthHero() {
             {/* eslint-disable-next-line @next/next/no-img-element -- local static asset in /public */}
             <img
               src="/images/neon-story.jpg"
-              alt="Аватар друга"
+              alt={t('Аватар друга')}
               className="h-full w-full rounded-pill object-cover"
             />
           </div>
 
           <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3">
             <div className="flex h-7 flex-1 items-center rounded-pill border border-white/40 bg-white/10 px-3 text-[11px] text-white/60 backdrop-blur-sm">
-              Ответить…
+              {t('Ответить…')}
             </div>
             <span className="flex h-7 w-7 items-center justify-center text-white">
               <Heart className="h-4 w-4" aria-hidden="true" />
@@ -103,7 +107,7 @@ export function AuthHero() {
           {/* eslint-disable-next-line @next/next/no-img-element -- local static asset in /public */}
           <img
             src="/images/friends-story.jpg"
-            alt="Фон истории"
+            alt={t('Фон истории')}
             className="h-full w-full object-cover brightness-75 contrast-125"
           />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-tr from-[#bc1888]/40 to-transparent" />

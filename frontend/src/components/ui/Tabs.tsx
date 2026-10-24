@@ -1,6 +1,8 @@
 'use client';
 
 import { cn } from '@/lib/utils';
+import { useT } from '@/lib/i18n/LocaleProvider';
+import { tr } from '@/lib/i18n/core';
 
 export interface TabItem {
   id: string;
@@ -21,7 +23,8 @@ export interface TabsProps {
  *
  * Arrow keys move between tabs, `Home`/`End` jump to the first/last tab.
  */
-export function Tabs({ items, active, onChange, className, label = 'Разделы' }: TabsProps) {
+export function Tabs({ items, active, onChange, className, label = tr('Разделы') }: TabsProps) {
+  const t = useT();
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const index = items.findIndex((item) => item.id === active);
     if (index === -1) return;
@@ -42,7 +45,7 @@ export function Tabs({ items, active, onChange, className, label = 'Раздел
   return (
     <div
       role="tablist"
-      aria-label={label}
+      aria-label={t(label)}
       onKeyDown={handleKeyDown}
       className={cn(
         'flex items-center gap-1 overflow-x-auto border-b border-border',

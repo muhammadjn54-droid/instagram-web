@@ -12,9 +12,11 @@ import { AuthFormCard } from './AuthFormCard';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useForgotPasswordMutation } from '@/features/account/accountApi';
+import { useT } from '@/lib/i18n/LocaleProvider';
+import { tr } from '@/lib/i18n/core';
 
 const schema = z.object({
-  email: z.string().trim().email('Некорректный e-mail'),
+  email: z.string().trim().email(tr('Некорректный e-mail')),
 });
 
 type Values = z.infer<typeof schema>;
@@ -22,11 +24,12 @@ type Values = z.infer<typeof schema>;
 /**
  * Recovery of a forgotten password.
  *
- * The backend has no mail service: `POST /account/forgot-password` answers
- * with the reset token itself. The token is therefore shown to the user
- * instead of pretending that an e-mail was sent.
+ * The backend has no mail service: outside production
+ * `POST /account/forgot-password` answers with the reset token itself, which
+ * is shown to the user instead of pretending that an e-mail was sent.
  */
 export function ForgotPasswordForm() {
+  const t = useT();
   const router = useRouter();
   const [forgotPassword, { isLoading, error, data }] = useForgotPasswordMutation();
   const [copied, setCopied] = useState(false);
@@ -41,7 +44,10 @@ export function ForgotPasswordForm() {
     defaultValues: { email: '' },
   });
 
-  const token = data?.match(/reset-token-\d+/)?.[0] ?? data ?? '';
+  // Development: the API returns the token ("…generated: <token>"). In production
+  // it is only delivered out of band and the response carries no token.
+  const token = data?.match(/generated:\s*(\S+)/)?.[1] ?? '';
+  const tokenSentOutOfBand = Boolean(data) && !token;
 
   const onSubmit = handleSubmit(async (values) => {
     setCopied(false);
@@ -64,16 +70,21 @@ export function ForgotPasswordForm() {
 
   return (
     <AuthFormCard
-      title="Не удаётся войти?"
-      description="Введите e-mail, который указан в профиле, чтобы получить токен восстановления."
+      title={t('Не удаётся войти?')}
+      description={t('Введите e-mail, который указан в профиле, чтобы получить токен восстановления.')}
       error={error?.message}
+      success={
+        tokenSentOutOfBand
+          ? t('Если такой e-mail зарегистрирован, токен восстановления отправлен.')
+          : undefined
+      }
       footer={
         <div className="mt-4">
           <Link
             href="/login"
             className="w-full py-2.5 sm:py-3 border border-[#0095F6] text-[#0095F6] hover:bg-[#0095F6]/5 font-semibold text-[14px] rounded-[12px] transition flex items-center justify-center text-center"
           >
-            Вернуться ко входу
+            {t('Вернуться ко входу')}
           </Link>
         </div>
       }
@@ -81,8 +92,7 @@ export function ForgotPasswordForm() {
       {token ? (
         <div className="space-y-4">
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-3 text-xs leading-relaxed text-emerald-700">
-            Токен восстановления создан. Сервер не отправляет письма — используйте
-            токен ниже, чтобы задать новый пароль.
+            {t('Токен восстановления создан. Сервер не отправляет письма — используйте токен ниже, чтобы задать новый пароль.')}
           </div>
 
           <div className="flex items-center gap-2 rounded-xl border border-neutral-300 bg-neutral-50 px-3 py-2">
@@ -91,7 +101,7 @@ export function ForgotPasswordForm() {
               {token}
             </code>
             <Button variant="ghost" size="sm" onClick={copyToken}>
-              {copied ? 'Скопировано' : 'Копировать'}
+              {copied ? t('Скопировано') : t('Копировать')}
             </Button>
           </div>
 
@@ -106,17 +116,17 @@ export function ForgotPasswordForm() {
               )
             }
           >
-            Задать новый пароль
+            {t('Задать новый пароль')}
           </button>
         </div>
       ) : (
         <form onSubmit={onSubmit} noValidate className="space-y-3.5">
           <Input
             type="email"
-            placeholder="Электронный адрес"
+            placeholder={t('Электронный адрес')}
             autoComplete="email"
-            aria-label="Электронный адрес"
-            error={errors.email?.message}
+            aria-label={t('Электронный адрес')}
+            error={t(errors.email?.message)}
             {...register('email')}
           />
 
@@ -128,7 +138,7 @@ export function ForgotPasswordForm() {
             {isLoading ? (
               <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              'Получить токен восстановления'
+              t('Получить токен восстановления')
             )}
           </button>
         </form>

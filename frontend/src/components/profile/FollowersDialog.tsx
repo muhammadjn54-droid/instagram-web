@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 
 import { Avatar } from '@/components/ui/Avatar';
 import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
 import { EmptyState, ErrorState, LoadingState } from '@/components/ui/States';
+import { useGetMyProfileQuery } from '@/features/profiles/profilesApi';
 import { useFollowUserMutation, useGetFollowersQuery, useGetFollowingQuery, useUnfollowUserMutation } from '@/features/users/usersApi';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 export interface FollowersDialogProps {
   open: boolean;
@@ -20,7 +21,8 @@ export interface FollowersDialogProps {
  * Dialog with the followers / following list.
  */
 export function FollowersDialog({ open, mode, userId, onClose }: FollowersDialogProps) {
-  const [, setReload] = useState(0);
+  const t = useT();
+  const { data: myProfile } = useGetMyProfileQuery();
 
   const followers = useGetFollowersQuery(
     { userId, pageNumber: 1, pageSize: 50 },
@@ -39,9 +41,8 @@ export function FollowersDialog({ open, mode, userId, onClose }: FollowersDialog
     try {
       if (isFollowing) await unfollow(targetUserId).unwrap();
       else await follow(targetUserId).unwrap();
-      setReload((value) => value + 1);
     } catch {
-      // The list is refreshed by the invalidated tags.
+      // The list is refreshed by the invalidated tags; a failed toggle simply keeps the old state.
     }
   };
 
@@ -51,16 +52,16 @@ export function FollowersDialog({ open, mode, userId, onClose }: FollowersDialog
     <Dialog
       open={open}
       onClose={onClose}
-      title={mode === 'followers' ? 'Подписчики' : 'Подписки'}
+      title={mode === 'followers' ? t('Подписчики') : t('Подписки')}
       size="sm"
     >
       {query.isLoading ? (
-        <LoadingState label="Загружаем список…" />
+        <LoadingState label={t('Загружаем список…')} />
       ) : query.isError ? (
         <ErrorState message={query.error?.message} onRetry={query.refetch} />
       ) : items.length === 0 ? (
         <EmptyState
-          title={mode === 'followers' ? 'Пока нет подписчиков' : 'Пока нет подписок'}
+          title={mode === 'followers' ? t('Пока нет подписчиков') : t('Пока нет подписок')}
           className="border-0 py-8"
         />
       ) : (
@@ -84,13 +85,15 @@ export function FollowersDialog({ open, mode, userId, onClose }: FollowersDialog
                 </span>
               </div>
 
-              <Button
-                variant={user.isFollowing ? 'secondary' : 'outline'}
-                size="sm"
-                onClick={() => toggleFollow(user.userId, user.isFollowing)}
-              >
-                {user.isFollowing ? 'Отписаться' : 'Подписаться'}
-              </Button>
+              {user.userId !== myProfile?.userId ? (
+                <Button
+                  variant={user.isFollowing ? 'secondary' : 'outline'}
+                  size="sm"
+                  onClick={() => toggleFollow(user.userId, user.isFollowing)}
+                >
+                  {user.isFollowing ? t('Отписаться') : t('Подписаться')}
+                </Button>
+              ) : null}
             </li>
           ))}
         </ul>

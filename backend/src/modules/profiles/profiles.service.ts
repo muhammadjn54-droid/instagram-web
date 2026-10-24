@@ -9,6 +9,8 @@ import { Favorite } from '../../entities/favorite.entity.js';
 import type { UpdateProfileDto, ProfileDetailDto } from './dto/profile.dto.js';
 import { PagedResult } from '../../common/responses/api-response.js';
 import { PaginationDto } from '../../common/dto/pagination.dto.js';
+import { PostsService } from '../posts/posts.service.js';
+import type { PostDto } from '../posts/dto/post.dto.js';
 
 @Injectable()
 export class ProfilesService {
@@ -23,6 +25,7 @@ export class ProfilesService {
     private readonly postRepository: Repository<Post>,
     @InjectRepository(Favorite)
     private readonly favoriteRepository: Repository<Favorite>,
+    private readonly postsService: PostsService,
   ) {}
 
   async getProfile(userId: number, currentUserId?: number): Promise<ProfileDetailDto> {
@@ -139,25 +142,22 @@ export class ProfilesService {
   async getFavorites(
     userId: number,
     query: PaginationDto,
-  ): Promise<PagedResult<Post>> {
+  ): Promise<PagedResult<PostDto>> {
     const pageNumber = Number(query.pageNumber) || 1;
     const pageSize = Math.min(Number(query.pageSize) || 10, 100);
     const skip = (pageNumber - 1) * pageSize;
 
     const [favorites, totalCount] = await this.favoriteRepository.findAndCount({
       where: { userId },
-      relations: {
-        post: {
-          images: true,
-          user: { profile: true },
-        },
-      },
       order: { createdAt: 'DESC' },
       skip,
       take: pageSize,
     });
 
-    const posts = favorites.map((f) => f.post).filter(Boolean) as Post[];
+    const posts = await this.postsService.findByIds(
+      favorites.map((f) => f.postId),
+      userId,
+    );
     return new PagedResult(posts, totalCount, pageNumber, pageSize);
   }
 }

@@ -7,9 +7,13 @@ import { User } from '../../entities/user.entity.js';
 import { Follow } from '../../entities/follow.entity.js';
 import { Post } from '../../entities/post.entity.js';
 import { Favorite } from '../../entities/favorite.entity.js';
+import { PostsModule } from '../posts/posts.module.js';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Profile, User, Follow, Post, Favorite])],
+  imports: [
+    TypeOrmModule.forFeature([Profile, User, Follow, Post, Favorite]),
+    PostsModule,
+  ],
   controllers: [ProfilesController],
   providers: [ProfilesService],
   exports: [ProfilesService],

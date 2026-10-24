@@ -20,6 +20,7 @@ import { StoriesModule } from './modules/stories/stories.module.js';
 import { ChatsModule } from './modules/chats/chats.module.js';
 import { LocationsModule } from './modules/locations/locations.module.js';
 import { SearchHistoryModule } from './modules/search-history/search-history.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { SearchHistoryModule } from './modules/search-history/search-history.mod
     ChatsModule,
     LocationsModule,
     SearchHistoryModule,
+    NotificationsModule,
   ],
   providers: [
     {

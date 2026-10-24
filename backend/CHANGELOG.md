@@ -3,6 +3,28 @@
 All notable changes of the Instagram-like Social Network API.
 Format: [semantic versioning](https://semver.org). Dates: `YYYY-MM-DD`.
 
+## [1.1.0] — 2026-10-24
+
+### Added
+- `GET /notifications` (`modules/notifications`): activity on the caller's account derived from `follows`, `post_likes`, `comments`, `story_likes`; no new tables.
+
+## [1.0.1] — 2026-10-23
+
+Functions & bugs pass (no new endpoints).
+
+### Security
+- `POST /account/reset-password` validates a random, single-use, 15-minute token (stored as SHA-256 in new nullable columns `users.resetTokenHash` / `resetTokenExpiresAt`). Before, any token was accepted.
+- `GET /profiles/me/favorites` returns `PostDto` (it leaked raw rows with the password hash).
+- Refresh tokens are random; `logout` / reset clear them with `null`.
+- `GET /users/:id` returns the e-mail only to its owner.
+
+### Fixed
+- `JwtAuthGuard`: optional authentication on `@Public()` routes → `isLikedByMe`, `isFavoriteByMe`, `isFollowing` work on public endpoints.
+- `isReel` boolean parsing (`"false"` was `true`) in `PostQueryDto` and `CreatePostDto`.
+
+### Docs
+- `API_CONTRACT.md` rewritten from the real controllers (64 endpoints).
+
 ## [0.1.0] — 2026-10-21
 
 First version of the documentation system. **No source code was changed.**

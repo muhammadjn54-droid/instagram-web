@@ -1,5 +1,8 @@
 # ROADMAP
 
+> **STATUS NOTE (2026-10-23):** milestones M0–M5 are functionally done with a different architecture than planned (RTK Query + BFF proxy instead of Server Actions / DAL). The live status is in `../../tz.md`; this file is kept for the original intent only.
+
+
 | Field | Value |
 |---|---|
 | Date | 2026-10-21 |

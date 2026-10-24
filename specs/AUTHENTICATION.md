@@ -1,65 +1,49 @@
 # Authentication & Session Architecture — Instagram Web Clone
 
-> **Document Version:** 1.0  
-> **Mechanism:** Stateless JWT Authentication with Server Validation
+> **Document Version:** 2.0 (2026-10-23) — rewritten to match the implementation (BFF + httpOnly cookies).
+> **Mechanism:** the backend issues a JWT; the Next.js server keeps it in an httpOnly cookie and attaches it to every backend call.
 
 ---
 
-## 1. Authentication Lifecycle
+## 1. Lifecycle
 
 ```
-[ Visitor ] 
-    │
-    ├──> POST /account/login (or /account/register)
-    │        │
-    │        ▼
-    │    [ NestJS Backend ]
-    │        ├── Validate credentials via bcrypt
-    │        └── Issue JWT { accessToken, refreshToken, user }
-    │
-    ▼
-[ Client Application ]
-    ├── Store token in localStorage ('instagram_token')
-    ├── Set browser session cookie ('instagram_token=...; SameSite=Lax')
-    └── Hydrate auth state -> Redirect to App Feed (/)
+Browser ──POST /api/session {userName, password}──► Next.js route handler
+                                                   │  POST /account/login (NestJS, bcrypt check)
+                                                   ◄─ { accessToken, refreshToken, expiresAt, user }
+        ◄─ Set-Cookie: ig_access (httpOnly), ig_refresh (httpOnly), ig_user ─┘
+Browser ──/api/backend/<path>──► Next.js proxy ──Authorization: Bearer <cookie token>──► NestJS
 ```
 
----
+* `userName` accepts a **username or an e-mail**.
+* `POST /api/session/register` registers and logs in in one step.
+* `DELETE /api/session` calls `POST /account/logout` and removes the cookies.
+* The browser JavaScript never sees the JWT (no `localStorage`, no readable cookie).
+* Cookie names live in `frontend/src/lib/auth/cookies.ts`; `secure` is enabled in production.
+* Access token lifetime: 24 h (JWT `exp`); the cookie has the same lifetime. The refresh endpoint exists on the backend but the UI does not call it — an expired session returns the user to the login page.
 
-## 2. Token Storage & Transmission
+## 2. Guards
 
-* **Client Storage:**
-  * Primary: `localStorage.getItem('instagram_token')`
-  * Secondary: `document.cookie` (enables server components and middleware to verify session existence).
-* **Outgoing Request Header:**
-  All authenticated requests automatically append:
-  ```http
-  Authorization: Bearer <accessToken>
-  ```
-* **Expiration & Error Handling:**
-  * When any API call returns `401 Unauthorized`, the client clears `localStorage` and `cookie`, then redirects to `/login`.
+| Layer | What it does |
+| :--- | :--- |
+| `src/proxy.ts` (Next.js 16 "middleware") | No cookie → redirect to `/login?redirect=<path>`; cookie present on an auth page → redirect to `/feed`. Checks presence only. |
+| NestJS `JwtAuthGuard` (global) | Validates the token on every route. Routes marked `@Public()` are open **but still read the token when one is sent** (needed for `isLikedByMe`, `isFollowing`, …). An invalid token on a public route is ignored, not rejected. |
+| `SessionGuard` (client) | On any `401` from the API: deletes the stale cookie (`DELETE /api/session`) and navigates to `/login?redirect=…`. Without the cookie deletion the proxy would bounce `/login` back to `/feed` forever. |
+| `safeRedirectPath` | Only same-site relative paths are accepted from `?redirect=` (no `//host`, no backslashes). |
 
----
+## 3. Password recovery
 
-## 3. Route Guard Policy
+1. `POST /account/forgot-password {email}` → the backend creates a random 24-byte token, stores only its SHA-256 hash and a 15 minute expiry on the user, writes the token to the server log.
+2. Outside production the response also contains the token (`"…generated: <token>"`) so the UI can show it — there is no mail service. With `NODE_ENV=production` the response carries no token.
+3. `POST /account/reset-password {token,email,password,confirmPassword}` → rejects with `400 Invalid or expired reset token` unless the hash matches and has not expired; the token is single use; the stored refresh token is revoked.
 
-| Route Pattern | Access Policy | Unauthenticated Action | Authenticated Action |
+## 4. Route access
+
+| Route pattern | Access | Unauthenticated | Authenticated |
 | :--- | :---: | :--- | :--- |
-| `/login` | Public Only | Renders Login Card | Redirects to `/` |
-| `/register` | Public Only | Renders Register Card | Redirects to `/` |
-| `/` | Dynamic | Renders Split Hero Landing | Renders Authenticated Feed |
-| `/explore` | Protected | Redirects to `/login` | Renders Explore Grid |
-| `/reels` | Protected | Redirects to `/login` | Renders Reels Player |
-| `/direct/**` | Protected | Redirects to `/login` | Renders Messaging Inbox |
-| `/[username]`| Protected | Redirects to `/login` | Renders Profile |
-| `/accounts/edit`| Protected | Redirects to `/login` | Renders Settings |
+| `/login`, `/register`, `/forgot-password`, `/reset-password` | public only | page | redirect to `/feed` |
+| everything else except `/api/*`, static files, `/uploads/*` | protected | redirect to `/login?redirect=…` | page |
 
----
+## 5. Test accounts
 
-## 4. Verified Test Accounts
-
-For automated and manual verification, the following 3 accounts exist in the SQLite database (seeded via `npm run seed`):
-* `alex_photographer` (password: `Password123!`)
-* `maria_art` (password: `Password123!`)
-* `john_traveler` (password: `Password123!`)
-* `mansur_dev` (password: `Password123!`)
+After `npm run seed` in `backend/` (the seed deletes existing rows first): 42 users, for example `muhammad_dev` — password `Password123!` for all.

@@ -11,6 +11,8 @@ import { MediaImage } from '@/components/shared/MediaImage';
 import { useToast } from '@/components/ui/Toast';
 import { useCreatePostMutation } from '@/features/posts/postsApi';
 import { useGetLocationsQuery } from '@/features/locations/locationsApi';
+import { getErrorMessage, validateImageFile } from '@/lib/utils';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 const MAX_IMAGES = 10;
 
@@ -18,6 +20,7 @@ const MAX_IMAGES = 10;
  * Composer of a new publication.
  */
 export function PostCreateForm() {
+  const t = useT();
   const router = useRouter();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,7 +38,15 @@ export function PostCreateForm() {
   const handleFiles = (fileList: FileList | null) => {
     if (!fileList) return;
 
-    const selected = Array.from(fileList).slice(0, MAX_IMAGES - files.length);
+    const candidates = Array.from(fileList).slice(0, MAX_IMAGES - files.length);
+    const selected: File[] = [];
+
+    for (const file of candidates) {
+      const problem = validateImageFile(file);
+      if (problem) toast(`${file.name}: ${t(problem)}`, 'error');
+      else selected.push(file);
+    }
+
     if (selected.length === 0) return;
 
     setFiles((current) => [...current, ...selected]);
@@ -58,7 +69,7 @@ export function PostCreateForm() {
     event.preventDefault();
 
     if (files.length === 0) {
-      toast('Добавьте хотя бы одно изображение', 'error');
+      toast(t('Добавьте хотя бы одно изображение'), 'error');
       return;
     }
 
@@ -71,10 +82,10 @@ export function PostCreateForm() {
         files,
       }).unwrap();
 
-      toast('Публикация создана', 'success');
+      toast(t('Публикация создана'), 'success');
       router.push(`/post/${created.id}`);
-    } catch {
-      toast('Не удалось создать публикацию', 'error');
+    } catch (error) {
+      toast(getErrorMessage(error, t('Не удалось создать публикацию')), 'error');
     }
   };
 
@@ -82,16 +93,16 @@ export function PostCreateForm() {
     <form onSubmit={handleSubmit} className="space-y-4">
       <Card className="space-y-4 p-4 sm:p-5">
         <Input
-          label="Заголовок"
-          placeholder="О чём эта публикация?"
+          label={t('Заголовок')}
+          placeholder={t('О чём эта публикация?')}
           value={title}
           maxLength={120}
           onChange={(event) => setTitle(event.target.value)}
         />
 
         <Textarea
-          label="Описание"
-          placeholder="Расскажите подробнее…"
+          label={t('Описание')}
+          placeholder={t('Расскажите подробнее…')}
           value={content}
           maxLength={2200}
           rows={5}
@@ -100,7 +111,7 @@ export function PostCreateForm() {
 
         <div className="space-y-1.5">
           <span className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Место
+            {t('Место')}
           </span>
           <div className="relative">
             <MapPin
@@ -112,10 +123,10 @@ export function PostCreateForm() {
               onChange={(event) =>
                 setLocationId(event.target.value === '' ? '' : Number(event.target.value))
               }
-              aria-label="Место публикации"
+              aria-label={t('Место публикации')}
               className="w-full appearance-none rounded-control border border-border bg-surface py-2 pl-9 pr-3 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
             >
-              <option value="">Без места</option>
+              <option value="">{t('Без места')}</option>
               {locations?.items.map((location) => (
                 <option key={location.id} value={location.id}>
                   {location.name}
@@ -133,14 +144,14 @@ export function PostCreateForm() {
             onChange={(event) => setIsReel(event.target.checked)}
             className="h-4 w-4 rounded border-border-strong accent-[var(--brand)]"
           />
-          Опубликовать как Reels
+          {t('Опубликовать как Reels')}
         </label>
       </Card>
 
       <Card className="space-y-3 p-4 sm:p-5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            Изображения ({files.length}/{MAX_IMAGES})
+            {t('Изображения ({count}/{max})', { count: files.length, max: MAX_IMAGES })}
           </span>
 
           <Button
@@ -151,14 +162,14 @@ export function PostCreateForm() {
             onClick={() => fileInputRef.current?.click()}
             disabled={files.length >= MAX_IMAGES}
           >
-            Выбрать
+            {t('Выбрать')}
           </Button>
         </div>
 
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           multiple
           className="sr-only"
           onChange={(event) => {
@@ -173,13 +184,13 @@ export function PostCreateForm() {
               <li key={preview} className="relative">
                 <MediaImage
                   src={preview}
-                  alt={`Предпросмотр ${index + 1}`}
+                  alt={t('Предпросмотр {n}', { n: index + 1 })}
                   aspectClassName="aspect-square rounded-control"
                 />
                 <button
                   type="button"
                   onClick={() => removeFile(index)}
-                  aria-label={`Удалить изображение ${index + 1}`}
+                  aria-label={t('Удалить изображение {n}', { n: index + 1 })}
                   className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-pill bg-foreground text-background shadow-popover"
                 >
                   <X className="h-3.5 w-3.5" aria-hidden="true" />
@@ -189,7 +200,7 @@ export function PostCreateForm() {
           </ul>
         ) : (
           <p className="rounded-control border border-dashed border-border px-4 py-8 text-center text-xs text-muted-foreground">
-            Изображения пока не выбраны
+            {t('Изображения пока не выбраны')}
           </p>
         )}
       </Card>
@@ -201,11 +212,11 @@ export function PostCreateForm() {
           onClick={() => router.back()}
           disabled={isLoading}
         >
-          Отмена
+          {t('Отмена')}
         </Button>
 
         <Button type="submit" loading={isLoading}>
-          Опубликовать
+          {t('Опубликовать')}
         </Button>
       </div>
     </form>

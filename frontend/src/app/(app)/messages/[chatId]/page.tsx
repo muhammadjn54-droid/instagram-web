@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 
 import { MessagesView } from '@/components/messages/MessagesView';
+import { getT } from '@/lib/i18n/server';
 
-export const metadata: Metadata = {
-  title: 'Сообщения',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  return { title: t('Сообщения') };
+}
 
 export default function ChatPage() {
   return <MessagesView />;

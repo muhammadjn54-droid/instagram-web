@@ -19,16 +19,19 @@ import {
   useUpdateProfileMutation,
 } from '@/features/profiles/profilesApi';
 import { Gender } from '@/types';
+import { getErrorMessage, validateImageFile } from '@/lib/utils';
+import { useT } from '@/lib/i18n/LocaleProvider';
+import { tr } from '@/lib/i18n/core';
 
 const schema = z.object({
-  fullName: z.string().trim().min(2, 'Укажите имя и фамилию'),
+  fullName: z.string().trim().min(2, tr('Укажите имя и фамилию')),
   userName: z
     .string()
     .trim()
-    .min(3, 'Минимум 3 символа')
-    .regex(/^[a-zA-Z0-9._]+$/, 'Только латиница, цифры, точка и подчёркивание'),
-  bio: z.string().max(300, 'Не больше 300 символов'),
-  website: z.string().trim().max(200, 'Не больше 200 символов'),
+    .min(3, tr('Минимум 3 символа'))
+    .regex(/^[a-zA-Z0-9._]+$/, tr('Только латиница, цифры, точка и подчёркивание')),
+  bio: z.string().max(300, tr('Не больше 300 символов')),
+  website: z.string().trim().max(200, tr('Не больше 200 символов')),
   gender: z.number(),
   isPrivate: z.boolean(),
 });
@@ -39,6 +42,7 @@ type Values = z.infer<typeof schema>;
  * Profile editor.
  */
 export function ProfileEditForm() {
+  const t = useT();
   const router = useRouter();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -89,11 +93,11 @@ export function ProfileEditForm() {
         isPrivate: values.isPrivate,
       }).unwrap();
 
-      toast('Профиль обновлён', 'success');
+      toast(t('Профиль обновлён'), 'success');
       router.push('/profile/me');
       router.refresh();
-    } catch {
-      toast('Не удалось сохранить профиль', 'error');
+    } catch (error) {
+      toast(getErrorMessage(error, t('Не удалось сохранить профиль')), 'error');
     }
   });
 
@@ -102,20 +106,26 @@ export function ProfileEditForm() {
     event.target.value = '';
     if (!file) return;
 
+    const problem = validateImageFile(file);
+    if (problem) {
+      toast(problem, 'error');
+      return;
+    }
+
     try {
       await updateAvatar(file).unwrap();
-      toast('Аватар обновлён', 'success');
-    } catch {
-      toast('Не удалось загрузить аватар', 'error');
+      toast(t('Аватар обновлён'), 'success');
+    } catch (error) {
+      toast(getErrorMessage(error, t('Не удалось загрузить аватар')), 'error');
     }
   };
 
   const handleAvatarDelete = async () => {
     try {
       await deleteAvatar().unwrap();
-      toast('Аватар удалён', 'success');
+      toast(t('Аватар удалён'), 'success');
     } catch {
-      toast('Не удалось удалить аватар', 'error');
+      toast(t('Не удалось удалить аватар'), 'error');
     }
   };
 
@@ -131,7 +141,7 @@ export function ProfileEditForm() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            aria-label="Загрузить аватар"
+            aria-label={t('Загрузить аватар')}
             className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-pill bg-accent text-white shadow-popover transition-colors hover:bg-accent/90"
           >
             <Camera className="h-4 w-4" aria-hidden="true" />
@@ -139,9 +149,9 @@ export function ProfileEditForm() {
         </div>
 
         <div className="flex-1 space-y-2">
-          <p className="text-sm font-semibold text-foreground">Аватар</p>
+          <p className="text-sm font-semibold text-foreground">{t('Аватар')}</p>
           <p className="text-xs text-muted-foreground">
-            PNG или JPG, до 5 МБ. Изображение будет обрезано по кругу.
+            {t('PNG, JPG или WEBP, до 5 МБ. Изображение будет обрезано по кругу.')}
           </p>
 
           <div className="flex gap-2">
@@ -152,7 +162,7 @@ export function ProfileEditForm() {
               onClick={() => fileInputRef.current?.click()}
               loading={isUploading}
             >
-              Загрузить
+              {t('Загрузить')}
             </Button>
 
             {profile?.avatar ? (
@@ -164,7 +174,7 @@ export function ProfileEditForm() {
                 loading={isDeleting}
                 icon={<Trash2 className="h-4 w-4" />}
               >
-                Удалить
+                {t('Удалить')}
               </Button>
             ) : null}
           </div>
@@ -173,7 +183,7 @@ export function ProfileEditForm() {
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           className="sr-only"
           onChange={handleAvatarChange}
         />
@@ -181,29 +191,29 @@ export function ProfileEditForm() {
 
       <Card className="space-y-4 p-4 sm:p-5">
         <Input
-          label="Имя и фамилия"
-          error={errors.fullName?.message}
+          label={t('Имя и фамилия')}
+          error={t(errors.fullName?.message)}
           {...register('fullName')}
         />
 
         <Input
-          label="Имя пользователя"
-          error={errors.userName?.message}
+          label={t('Имя пользователя')}
+          error={t(errors.userName?.message)}
           {...register('userName')}
         />
 
         <Textarea
-          label="О себе"
-          hint="До 300 символов"
-          error={errors.bio?.message}
+          label={t('О себе')}
+          hint={t('До 300 символов')}
+          error={t(errors.bio?.message)}
           rows={4}
           {...register('bio')}
         />
 
         <Input
-          label="Ссылка"
+          label={t('Ссылка')}
           placeholder="https://example.com"
-          error={errors.website?.message}
+          error={t(errors.website?.message)}
           {...register('website')}
         />
 
@@ -212,15 +222,15 @@ export function ProfileEditForm() {
             htmlFor="gender"
             className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground"
           >
-            Пол
+            {t('Пол')}
           </label>
           <select
             id="gender"
             {...register('gender', { valueAsNumber: true })}
             className="w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
           >
-            <option value={Gender.Male}>Мужской</option>
-            <option value={Gender.Female}>Женский</option>
+            <option value={Gender.Male}>{t('Мужской')}</option>
+            <option value={Gender.Female}>{t('Женский')}</option>
           </select>
         </div>
 
@@ -230,16 +240,16 @@ export function ProfileEditForm() {
             className="h-4 w-4 rounded border-border-strong accent-[var(--brand)]"
             {...register('isPrivate')}
           />
-          Закрытый аккаунт — публикации видят только подписчики
+          {t('Закрытый аккаунт — публикации видят только подписчики')}
         </label>
       </Card>
 
       <div className="flex justify-end gap-2">
         <Button type="button" variant="ghost" onClick={() => router.back()} disabled={isSaving}>
-          Отмена
+          {t('Отмена')}
         </Button>
         <Button type="submit" loading={isSaving}>
-          Сохранить
+          {t('Сохранить')}
         </Button>
       </div>
     </form>

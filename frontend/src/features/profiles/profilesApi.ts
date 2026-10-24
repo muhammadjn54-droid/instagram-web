@@ -1,6 +1,6 @@
 import { igApi } from '@/store/api/baseApi';
 import { API_ROUTES } from '@/lib/api/endpoints';
-import type { FavoritePost, PagedResult, PaginationQuery, Profile, UpdateProfileInput } from '@/types';
+import type { PagedResult, PaginationQuery, Post, Profile, UpdateProfileInput } from '@/types';
 
 const profilesApi = igApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -43,16 +43,15 @@ const profilesApi = igApi.injectEndpoints({
       invalidatesTags: ['Profile', 'User', 'Account'],
     }),
 
-    /**
-     * The backend answers this endpoint with raw TypeORM entities instead of
-     * `PostDto`, therefore the payload is typed as `FavoritePost`.
-     */
-    getFavorites: builder.query<PagedResult<FavoritePost>, PaginationQuery>({
+    getFavorites: builder.query<PagedResult<Post>, PaginationQuery>({
       query: (params) => ({
         url: API_ROUTES.profiles.favorites,
         params: { pageNumber: params.pageNumber ?? 1, pageSize: params.pageSize ?? 12 },
       }),
-      providesTags: ['Post'],
+      providesTags: (result) => [
+        { type: 'Post' as const, id: 'LIST' as const },
+        ...(result?.items ?? []).map((item) => ({ type: 'Post' as const, id: item.id })),
+      ],
     }),
   }),
 });

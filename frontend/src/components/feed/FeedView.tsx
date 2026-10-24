@@ -8,6 +8,7 @@ import { StoriesTray } from './StoriesTray';
 import { PostCard } from './PostCard';
 import { usePageParam } from '@/components/shared/usePageParam';
 import { useGetFeedQuery } from '@/features/posts/postsApi';
+import { useT } from '@/lib/i18n/LocaleProvider';
 
 const PAGE_SIZE = 10;
 
@@ -15,6 +16,7 @@ const PAGE_SIZE = 10;
  * Main feed.
  */
 export function FeedView() {
+  const t = useT();
   const [page, setPage] = usePageParam();
   const { data, isLoading, isError, error, refetch, isFetching } = useGetFeedQuery({
     pageNumber: page,
@@ -22,13 +24,13 @@ export function FeedView() {
   });
 
   if (isLoading) {
-    return <LoadingState label="Загружаем ленту…" />;
+    return <LoadingState label={t('Загружаем ленту…')} />;
   }
 
   if (isError) {
     return (
       <ErrorState
-        title="Не удалось загрузить ленту"
+        title={t('Не удалось загрузить ленту')}
         message={error?.message}
         onRetry={refetch}
       />
@@ -44,8 +46,8 @@ export function FeedView() {
       {posts.length === 0 ? (
         <EmptyState
           icon={<Compass className="h-6 w-6" aria-hidden="true" />}
-          title="Пока здесь ничего нет"
-          description="Подпишитесь на других пользователей, чтобы видеть их публикации в ленте."
+          title={t('Пока здесь ничего нет')}
+          description={t('Подпишитесь на других пользователей, чтобы видеть их публикации в ленте.')}
         />
       ) : (
         <div className={isFetching ? 'opacity-60 transition-opacity' : undefined}>

@@ -46,6 +46,7 @@ async function bootstrap() {
     .addTag('Stories', '24-hour disappearing stories, views, and likes')
     .addTag('Chats', 'Direct messages and conversations')
     .addTag('Locations', 'Geographical locations and spots')
+    .addTag('Notifications', 'Activity on my account: follows, likes, comments')
     .addTag('SearchHistory', 'Search queries and user search history')
     .build();
 
